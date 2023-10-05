@@ -1,0 +1,70 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "BucketsAccess",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetObject",
+                "s3:GetBucketLocation",
+                "s3:GetBucketNotification",
+                "s3:PutBucketNotification"
+            ],
+            %{ for bucket in bucket_names ~}
+            "Resource": [
+                
+                "arn:aws:s3:::${bucket}",
+                "arn:aws:s3:::${bucket}/*"
+                
+            ]
+            %{ endfor ~}
+        },
+        %{ for kms_arn in kms_arns ~}
+        {
+            "Sid": "BucketsDecrypt",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": ${kms_arn}
+        },
+        %{ endfor ~}
+        {
+            "Sid": "HuntersIngestionList",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListAllMyBuckets",
+                "sns:ListTopics"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "HuntersIngestionNotificationsSetup",
+            "Effect": "Allow",
+            "Action": [
+                "sns:ListSubscriptionsByTopic",
+                "sns:GetTopicAttributes",
+                "sns:SetTopicAttributes",
+                "sns:CreateTopic",
+                "sns:TagResource",
+                "sns:Publish",
+                "sns:Subscribe"
+            ],
+            "Resource": [
+                "arn:aws:sns:*:*:hunters?ingestion*"
+            ]
+        },
+        {
+            "Sid": "HuntersIngestionNotificationsTeardown",
+            "Effect": "Allow",
+            "Action": [
+                "sns:Unsubscribe",
+                "sns:DeleteTopic"
+            ],
+            "Resource": [
+                "arn:aws:sns:*:*:hunters?ingestion*"
+            ]
+        }
+    ]
+}
