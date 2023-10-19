@@ -1,38 +1,47 @@
-# CDK PROJECT FOR HUNTERs (and others) INTEGRATION
+# CDK PROJECT FOR HUNTERs, WIZ AND FUTURE ADDITIONALs INTEGRATIONs
 ---
 
 ## Description
 
 This project is created for the deployment of the main elements that allow
-the integration with Hunter:
+the integration with Hunter, Wiz and other future products supporting integration
+via the indicated described design in next section:
 
-- S3 cloudTrail Log (creation/import in future versions to avoid modify data)
-- SNS Topic for CloudTrail , it will allow the *"FanOut"* to corresponding SQS Queues
-  for integrations
-- SQS Queue for Hunters
-- S3 Event notification to SNS Cloudtrail for object creation
-- SQS Subscription to the SNS CloudTrail 
+- S3 Bucket Logs 
+  (Currently creation but in future versions the flag should allow the "import to avoid modify existing data)
+- SNS Topics allowing the *"FanOut"* to corresponding SQS Queues for integrations purposes
+- SQS Queues receiving notifications via SNS SUbscriptions
+- S3 Event notification to SNS Topics for the object creation
+- SQS Subscriptions to the SNS Topics
+
+## "*Architecture Design*"
+
+The main architecture follows the next schema:
+
+![Architecture Design](./docs/images/main_architecture_design.png)
 
 ## Pending/Future Tasks
 
 - Additional tests (Currently passed all tests via *'localstack'*. Successfully deployed stack and resources on it)
-- Migrate the Policies and Roles for Hunters from CFN/Terraform associated projects
 - Include additional S3 Buckets,SNS Topics and SQS Queues for 
-  integration with additional products
+  integration with additional products: Currently WIZ in progress
 
 ## Requirements
 
 The only requirements to run this project are:
 
-- Have access to an AWS Account
-- Have configured the AWS CDK on the *"HOst"* running the project
-- Recommended have configured the AWS CLI too
+- Access to an AWS Account/Environment
+- AWS CDK (or alternative) configured on the *"HOST"* running the project
+- AWS CLI (or alternative) configured ton the *"HOST"* running the project
 
 ## Useful commands
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+|COMMAND|DESCRIPTION|
+|:---:|:---:|
+|`npm run build`|Compile typescript to js|
+|`npm run watch`|Watch for changes and compile|
+|`npm run test`|Perform the jest unit tests|
+|`cdk deploy`|Deploy this stack to your default AWS account/region|
+|`cdk destroy`|Remove the created resources for the implemented stacks|
+|`cdk diff`|Compare deployed stack with current state|
+|`cdk synth`|Emits the synthesized CloudFormation template|

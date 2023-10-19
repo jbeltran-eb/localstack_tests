@@ -1,14 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
-//import { aws_s3 as s3 } from 'aws-cdk-lib';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as s3Notifications from 'aws-cdk-lib/aws-s3-notifications';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3Notifications from 'aws-cdk-lib/aws-s3-notifications';
 
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -30,33 +28,27 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       `tlz-vpc-flowlogs-central-${MainAWSAccount}`,
     ]
 
-    let EnableS3SNSEventNotification: boolean = false
+    let EnableS3SNSEventNotification: boolean = false;
+
+    let CreateSQSQueues: boolean = true; //Currently affects to the SNS Topics creation
+
+    let CreateListOfS3Buckets: boolean = true; //Currently affects to the SNS Topics creation
 
     const kmsArns = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab"; //Test-Fixed arn, replace for parameter or context in future versions
 
-    //Create the SQS for Hunters:
-    const HuntersCloudTrailsQueue = new sqs.Queue(this, 'HuntersCloudTrailQueue', {
-      queueName: 'hunters-cloudtrail-logs-queue',
-      //visibilityTimeout: Duration.days(4),
-    });
+    let TLZCloudTrailBucket: any;
+    let TLZConfigBucket: any;
+    let TLZGuardDutyBucket: any;
+    let TLZVPCFlowLogsBucket: any;
 
-    //Create the SQS for WIZ:
-    const WizCloudTrailsQueue = new sqs.Queue(this, 'WizCloudTrailQueue', {
-      queueName: 'wiz-cloudtrail-logs-queue',
-      //visibilityTimeout: Duration.days(4),
-    });
+    let TLZCloudtrailLogsEventTopic: any;
+    let TLZConfigLogsEventTopic: any;
+    let TLZGuardDutyLogsEventTopic: any;
+    let TLZVPCFlowLogsEventTopic: any;
 
-    //Create the SNS and Bind for Hunters:
-    const TLZCloudtrailLogsEventTopic = new sns.Topic(this, 'TLZCloudtrailLogsEventTopic', {
-      topicName: 'cloudtrail-logs-notify'
-    });
-
-    // Bind the SQS Queue to the SNS Topic.
-    const HuntersCloudTrailsQueueSubscription = new snsSubscriptions.SqsSubscription(HuntersCloudTrailsQueue, {
-      rawMessageDelivery: true
-    });
-
-    TLZCloudtrailLogsEventTopic.addSubscription(HuntersCloudTrailsQueueSubscription);
+    let HuntersCloudTrailsQueue: any;
+    let WizCloudTrailsQueue: any;
+    let HuntersCloudTrailsQueueSubscription: any;
 
 
     // Create the S3 Buckets:
@@ -65,29 +57,59 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //    as protection in PROD envs.
     //  - Versioning disabled: Once it's enable no more possible disable it
     //
-    const TLZCloudTrailBucket = new s3.Bucket(this, ListOfS3Buckets[0], {
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      autoDeleteObjects: false,
-      versioned: false
-    });
+    if (CreateListOfS3Buckets){
 
-    const TLZConfigBucket = new s3.Bucket(this, ListOfS3Buckets[1], {
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      autoDeleteObjects: false,
-      versioned: false
-    });
+        TLZCloudTrailBucket = new s3.Bucket(this, ListOfS3Buckets[0], {
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        autoDeleteObjects: false,
+        versioned: false
+      });
 
-    const TLZGuardDutyBucket = new s3.Bucket(this, ListOfS3Buckets[2], {
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      autoDeleteObjects: false,
-      versioned: false
-    });
+        TLZConfigBucket = new s3.Bucket(this, ListOfS3Buckets[1], {
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        autoDeleteObjects: false,
+        versioned: false
+      });
 
-    const TLZVPCFlowLogsBucket = new s3.Bucket(this, ListOfS3Buckets[3], {
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      autoDeleteObjects: false,
-      versioned: false
-    });
+        TLZGuardDutyBucket = new s3.Bucket(this, ListOfS3Buckets[2], {
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        autoDeleteObjects: false,
+        versioned: false
+      });
+
+        TLZVPCFlowLogsBucket = new s3.Bucket(this, ListOfS3Buckets[3], {
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        autoDeleteObjects: false,
+        versioned: false
+      });
+
+    }
+
+    //Create the SNS Topics:
+    //
+    if (CreateListOfS3Buckets){
+
+      // Hunters
+      TLZCloudtrailLogsEventTopic = new sns.Topic(this, 'TLZCloudtrailLogsEventTopic', {
+        topicName: 'cloudtrail-logs-notify'
+      });
+
+      // Config Central:
+      TLZConfigLogsEventTopic = new sns.Topic(this, 'TLZConfigLogsEventTopic', {
+        topicName: 'config-logs-notify'
+      });
+
+      // GuardDuty:
+      TLZGuardDutyLogsEventTopic = new sns.Topic(this, 'TLZGuardDutyLogsEventTopic', {
+        topicName: 'guardduty-logs-notify'
+      });
+
+      // VPC-FlowLogs:
+      TLZVPCFlowLogsEventTopic = new sns.Topic(this, 'TLZVPCFlowLogsEventTopic', {
+        topicName: 'vpcflow-logs-notify'
+      });
+
+    }
 
     // Binds the S3 buckets to the SNS Topics via notifications: 
     // [Enable Outside of Localstack DevEnv Only - Use local var]
@@ -99,7 +121,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //    during deployment because docker.sock volume is required. Unfortunately
     //    "--volume" option is not mounting required volume under MacOS in localstack-cli 
     //
-    if (EnableS3SNSEventNotification){
+    if (EnableS3SNSEventNotification && CreateListOfS3Buckets){
 
       TLZCloudTrailBucket.addEventNotification(
         // Modify the `s3.EventType.*` to handle other object operations.
@@ -110,20 +132,49 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       TLZConfigBucket.addEventNotification(
         // Modify the `s3.EventType.*` to handle other object operations.
         s3.EventType.OBJECT_CREATED_PUT,
-        new s3Notifications.SnsDestination(TLZCloudtrailLogsEventTopic),
+        new s3Notifications.SnsDestination(TLZConfigLogsEventTopic),
       );
 
       TLZGuardDutyBucket.addEventNotification(
         // Modify the `s3.EventType.*` to handle other object operations.
         s3.EventType.OBJECT_CREATED_PUT,
-        new s3Notifications.SnsDestination(TLZCloudtrailLogsEventTopic),
+        new s3Notifications.SnsDestination(TLZGuardDutyLogsEventTopic),
       );
 
       TLZVPCFlowLogsBucket.addEventNotification(
         // Modify the `s3.EventType.*` to handle other object operations.
         s3.EventType.OBJECT_CREATED_PUT,
-        new s3Notifications.SnsDestination(TLZCloudtrailLogsEventTopic),
+        new s3Notifications.SnsDestination(TLZVPCFlowLogsEventTopic),
       );
+
+    }
+
+    //Create the SQS Queues:
+    //
+    if (CreateSQSQueues){
+      //Hunters:
+      HuntersCloudTrailsQueue = new sqs.Queue(this, 'HuntersCloudTrailQueue', {
+        queueName: 'hunters-cloudtrail-logs-queue',
+        //visibilityTimeout: Duration.days(4),
+      });
+
+      //WIZ:
+      WizCloudTrailsQueue = new sqs.Queue(this, 'WizCloudTrailQueue', {
+        queueName: 'wiz-cloudtrail-logs-queue',
+        //visibilityTimeout: Duration.days(4),
+      });
+
+    }
+
+    //Create SQS Subscription when required for corresponding SNS Topics
+    //
+    if (CreateSQSQueues && EnableS3SNSEventNotification){
+      //Hunters:
+      HuntersCloudTrailsQueueSubscription = new snsSubscriptions.SqsSubscription(HuntersCloudTrailsQueue, {
+        rawMessageDelivery: true
+      });
+
+      TLZCloudtrailLogsEventTopic.addSubscription(HuntersCloudTrailsQueueSubscription);
 
     }
 
@@ -210,6 +261,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
 
     //HUNTERs:
+
 
   }
 }
