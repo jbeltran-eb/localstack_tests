@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import {CfnParameter} from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
@@ -49,12 +50,21 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     let WizCloudTrailsQueue: any;
     let HuntersCloudTrailsQueueSubscription: any;
 
+    //Cloudformation Parameters:
+    //
+    // parameter of type String
+    const HuntersKmsArns = new CfnParameter(this, 'HuntersKmsArns', {
+      default: '',
+      description: 'KMS ARN if required - Format: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab',
+      type: 'String',
+    }).valueAsString;
+
     // Variables specific for Hunters:
     // Notes:
     //  - Kms Arns currently fixed to "dummy" value for testing
     //
     //
-    let HuntersKmsArns: string = ""; //Use in future a value if given/required: "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+    //let HuntersKmsArns: string = ""; //Use in future a value if given/required: "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
     let HuntersBucketNames: string[] = [
       `${ListOfS3Buckets[0]}`
     ]
