@@ -20,7 +20,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //  - Currently only used in a fixed way but in future we will create the complete structure
     //    associated to each S3 Bucket in the list of Buckets (Enforce by Configuration)
     //
-    let MainAWSAccount: string = "903958141776"; 
+    let MainAWSAccount: string = "000000000000" //Replace by real one: "903958141776"; 
     let ListOfS3Buckets: string[] = [
       `tlz-cloudtrail-central-${MainAWSAccount}`,
       `tlz-config-central-${MainAWSAccount}`,
@@ -54,13 +54,17 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //  - Kms Arns currently fixed to "dummy" value for testing
     //
     //
-    const HuntersKmsArns = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-
+    let HuntersKmsArns: string = ""; //Use in future a value if given/required: "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
     let HuntersBucketNames: string[] = [
       `${ListOfS3Buckets[0]}`
     ]
 
-    const PolicyName = 'hunters-integration-policy'
+    let HuntersPolicyAndRoleId: string = "76d0638c" //It's not defined exactly the criteria currently used in CFN for this ID - Pending of Definition
+    let HuntersIamPolicyName: string = `hunters-integration-policy-${HuntersPolicyAndRoleId}`  
+    let HuntersRoleName: string = `hunters-integration-role-${HuntersPolicyAndRoleId}`   
+    let HuntersAccountId: string = "000000000000"                              //It's not strictly the same that account were this cdk is deployed
+                                                                              // i.e: 685648138888
+    let HuntersExternalId: string = "9c7779b2-4bf8-4d04-9ec8-67186102afc1"    //Reported/Given by Hunters
 
     // Create the S3 Buckets:
     // Notes:
@@ -259,8 +263,8 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     // - Review the desired policy name, recommended use something with 
     //   a unique id. i.e in original CFN: hunters-integration-policy-76d0638c
     //
-    new iam.ManagedPolicy(this, 'IamHuntersPolicy', {
-      managedPolicyName: `${PolicyName}`,
+    const HuntersIamPolicy = new iam.ManagedPolicy(this, 'IamHuntersPolicy', {
+      managedPolicyName: `${HuntersIamPolicyName}`,
       statements: HuntersPolicyStatements,
     });
 
@@ -270,9 +274,21 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //  - Move to specific and separated construct in future. 
     //
 
-
     //HUNTERs:
+    //
+    // Notes:
+    //  - Using arn in assumedBy in place of new iam.AccountPrincipal(`${HuntersAccountId}`),
+    //
+    //
 
+    const HuntersIamRole = new iam.Role(this, 'IamHuntersRole', {
+      assumedBy: new iam.ArnPrincipal(`arn:aws:iam::${HuntersAccountId}:root`),
+      externalIds: [`${HuntersExternalId}`],
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(`${HuntersIamPolicyName}`),
+      ],
+      roleName: `${HuntersRoleName}`,
+    });
 
-  }
-}
+  } //constructor
+} // main class
