@@ -34,7 +34,6 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     let CreateListOfS3Buckets: boolean = true; //Currently affects to the SNS Topics creation
 
-    const kmsArns = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab"; //Test-Fixed arn, replace for parameter or context in future versions
 
     let TLZCloudTrailBucket: any;
     let TLZConfigBucket: any;
@@ -50,6 +49,18 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     let WizCloudTrailsQueue: any;
     let HuntersCloudTrailsQueueSubscription: any;
 
+    // Variables specific for Hunters:
+    // Notes:
+    //  - Kms Arns currently fixed to "dummy" value for testing
+    //
+    //
+    const HuntersKmsArns = "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+
+    let HuntersBucketNames: string[] = [
+      `${ListOfS3Buckets[0]}`
+    ]
+
+    const PolicyName = 'hunters-integration-policy'
 
     // Create the S3 Buckets:
     // Notes:
@@ -196,8 +207,8 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
           's3:PutBucketNotification',
         ],
         resources: [
-          `arn:aws:s3:::${ListOfS3Buckets[0]}`,
-          `arn:aws:s3:::${ListOfS3Buckets[0]}/*`  
+          `arn:aws:s3:::${HuntersBucketNames[0]}`,
+          `arn:aws:s3:::${HuntersBucketNames[0]}/*`  
         ],
       }),
       new iam.PolicyStatement({
@@ -235,12 +246,12 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     ];
 
     // Only add when decrypt required:
-    if (kmsArns && kmsArns.length > 0) {
+    if (HuntersKmsArns && HuntersKmsArns.length > 0) {
       HuntersPolicyStatements.push(new iam.PolicyStatement({
         sid: 'BucketsDecrypt',
         effect: iam.Effect.ALLOW,
         actions: ['kms:Decrypt'],
-        resources: [ `${kmsArns}` ],
+        resources: [ `${HuntersKmsArns}` ],
       }));
     }
 
@@ -249,7 +260,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //   a unique id. i.e in original CFN: hunters-integration-policy-76d0638c
     //
     new iam.ManagedPolicy(this, 'IamHuntersPolicy', {
-      managedPolicyName: 'hunters-integration-policy',
+      managedPolicyName: `${PolicyName}`,
       statements: HuntersPolicyStatements,
     });
 
