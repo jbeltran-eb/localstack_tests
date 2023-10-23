@@ -52,7 +52,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     //Cloudformation Parameters:
     //
-    // parameter of type String
+
     const HuntersKmsArns = new CfnParameter(this, 'HuntersKmsArns', {
       default: '',
       description: 'KMS ARN if required - Format: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab',
