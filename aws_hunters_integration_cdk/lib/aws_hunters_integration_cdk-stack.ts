@@ -16,26 +16,32 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     // The code that defines the stack:
     // 
 
-    //Variables - Internal:
-    // Notes:
-    //  - Currently only used in a fixed way but in future we will create the complete structure
-    //    associated to each S3 Bucket in the list of Buckets (Enforce by Configuration)
+    //Context Variables:
+
+    //General
+    const MainAWSAccount = this.node.tryGetContext('MainAWSAccount')
+    const EnableS3SNSEventNotification = this.node.tryGetContext('EnableS3SNSEventNotification')
+    const CreateSQSQueues = this.node.tryGetContext('CreateSQSQueues')
+    const CreateListOfS3Buckets = this.node.tryGetContext('CreateListOfS3Buckets')
+
+    //Hunters
+    const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName')
+    const HuntersBucketName	= `${HunterBucketBaseName}-${MainAWSAccount}`
+    const HuntersAccountId	= this.node.tryGetContext('HuntersAccountId')
+    const HuntersExternalId	= this.node.tryGetContext('HuntersExternalId')
+    const HuntersKmsArns = this.node.tryGetContext('HuntersKmsArns')
+    const HuntersIamPolicyName	= this.node.tryGetContext('HuntersIamPolicyName')
+    const HuntersRoleName	= this.node.tryGetContext('HuntersRoleName')
+
+    // Dynamic Global Vars:
+    // (Organized by Resource)
     //
-    let MainAWSAccount: string = "000000000000" //Replace by real one: "903958141776"; 
     let ListOfS3Buckets: string[] = [
       `tlz-cloudtrail-central-${MainAWSAccount}`,
       `tlz-config-central-${MainAWSAccount}`,
       `tlz-guardduty-central-${MainAWSAccount}`,
       `tlz-vpc-flowlogs-central-${MainAWSAccount}`,
     ]
-
-    let EnableS3SNSEventNotification: boolean = false;
-
-    let CreateSQSQueues: boolean = true; //Currently affects to the SNS Topics creation
-
-    let CreateListOfS3Buckets: boolean = true; //Currently affects to the SNS Topics creation
-
-
     let TLZCloudTrailBucket: any;
     let TLZConfigBucket: any;
     let TLZGuardDutyBucket: any;
@@ -50,54 +56,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     let WizCloudTrailsQueue: any;
     let HuntersCloudTrailsQueueSubscription: any;
 
-    //Cloudformation Parameters:
-    //
-
-    // Hunters Params:
-    const HuntersKmsArns = new CfnParameter(this, 'HuntersKmsArns', {
-      default: '',
-      description: 'KMS ARN when required',
-      type: 'String',
-      allowedPattern: "arn:aws:kms:(af|ap|ca|eu|me|sa|us)-(central|north|(north(?:east|west))|south|south(?:east|west)|east|west)-\d+:[0-9]{12}:key\/[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}",
-    }).valueAsString;
-
-    const HuntersExternalId = new CfnParameter(this, 'HuntersExternalId', {
-      default: '',
-      description: 'Hunters Given External Id',
-      type: 'String',
-    }).valueAsString;
-
-    const HuntersAccountId = new CfnParameter(this, 'HuntersAccountId', {
-      default: '',
-      description: 'Hunters AWS Account Id',
-      type: 'String',
-      allowedPattern: "[0-9]{12}"
-    }).valueAsString;
-
-    const HuntersRoleName = new CfnParameter(this, 'HuntersRoleName', {
-      default: 'hunters-integration-role',
-      description: 'Name for the Hunters Role',
-      type: 'String',
-    }).valueAsString;
-
-    const HuntersIamPolicyName = new CfnParameter(this, 'HuntersIamPolicyName', {
-      default: 'hunters-integration-policy',
-      description: 'Name for the Hunters Policy',
-      type: 'String',
-    }).valueAsString;
-
-    const HuntersBucketNames = new CfnParameter(this, 'HuntersBucketNames', {
-      default: `${ListOfS3Buckets[0]}`,
-      description: 'List of S3 Buckets for Hunters',
-      type: 'CommaDelimitedList',
-    }).valueAsList;
-
-
     // Create the S3 Buckets:
-    // Notes:
-    //  - remove policy and auto delete are configured to avoid "delete" the bucket content
-    //    as protection in PROD envs.
-    //  - Versioning disabled: Once it's enable no more possible disable it
     //
     if (CreateListOfS3Buckets){
 
@@ -157,7 +116,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     // [Enable Outside of Localstack DevEnv Only - Use local var]
     // Note:
     //  - At this moment only creation object will be supported
-    //  - Unfortunately localstack freetier doesn't allow test this correctly
+    //  - Unfortunately localstack free-tier doesn't allow test this correctly
     //    . Notification is not supported at this layer. 
     //    In addition, the lambda related code or functionalities using throws errors
     //    during deployment because docker.sock volume is required. Unfortunately
@@ -238,8 +197,8 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
           's3:PutBucketNotification',
         ],
         resources: [
-          `arn:aws:s3:::${cdk.Fn.select(0, HuntersBucketNames)}`,
-          `arn:aws:s3:::${cdk.Fn.select(0, HuntersBucketNames)}/*`
+          `arn:aws:s3:::${HuntersBucketName}`,
+          `arn:aws:s3:::${HuntersBucketName}/*`
 
         ],
       }),
@@ -288,8 +247,6 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     }
 
     //Note:
-    // - Review the desired policy name, recommended use something with 
-    //   a unique id. i.e in original CFN: hunters-integration-policy-76d0638c
     //
     const HuntersIamPolicy = new iam.ManagedPolicy(this, 'IamHuntersPolicy', {
       managedPolicyName: `${HuntersIamPolicyName}`,
@@ -304,11 +261,6 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     //HUNTERs:
     //
-    // Notes:
-    //  - Using arn in assumedBy in place of new iam.AccountPrincipal(`${HuntersAccountId}`),
-    //
-    //
-
     const HuntersIamRole = new iam.Role(this, 'IamHuntersRole', {
       assumedBy: new iam.ArnPrincipal(`arn:aws:iam::${HuntersAccountId}:root`),
       externalIds: [`${HuntersExternalId}`],
