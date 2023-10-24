@@ -16,24 +16,29 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     // The code that defines the stack:
     // 
 
-    //Context Variables:
+    //Context Variables/Const:
 
     //General
-    const MainAWSAccount = this.node.tryGetContext('MainAWSAccount')
-    const EnableS3SNSEventNotification = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? true : false )
-    const CreateSQSQueues = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? true : false)
-    const CreateListOfS3Buckets = (this.node.tryGetContext('CreateListOfS3Buckets') === 'false' ? true : false)
+    const MainAWSAccount = this.node.tryGetContext('MainAWSAccount');
+    const EnableS3SNSEventNotification: boolean = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? false : true );
+    const CreateSQSQueues: boolean = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? false : true);
+    const CreateListOfS3Buckets: boolean = (this.node.tryGetContext('CreateListOfS3Buckets') === 'false' ? false : true);
+    
+    console.log('-- ENABLED FEATURES --');
+    console.log('Create List of S3 Buckets: %s',CreateListOfS3Buckets);
+    console.log('Create SQS Queues: %s', CreateSQSQueues);
+    console.log('Enable S3 SNS Event Notifications: %s',EnableS3SNSEventNotification);
 
     //Hunters
-    const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName')
-    const HuntersBucketName	= `${HunterBucketBaseName}-${MainAWSAccount}`
-    const HuntersAccountId	= this.node.tryGetContext('HuntersAccountId')
-    const HuntersExternalId	= this.node.tryGetContext('HuntersExternalId')
-    const HuntersKmsArns = this.node.tryGetContext('HuntersKmsArns')
-    const HuntersIamPolicyName	= this.node.tryGetContext('HuntersIamPolicyName')
-    const HuntersRoleName	= this.node.tryGetContext('HuntersRoleName')
+    const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName');
+    const HuntersBucketName	= `${HunterBucketBaseName}-${MainAWSAccount}`;
+    const HuntersAccountId	= this.node.tryGetContext('HuntersAccountId');
+    const HuntersExternalId	= this.node.tryGetContext('HuntersExternalId');
+    const HuntersKmsArns = this.node.tryGetContext('HuntersKmsArns');
+    const HuntersIamPolicyName	= this.node.tryGetContext('HuntersIamPolicyName');
+    const HuntersRoleName	= this.node.tryGetContext('HuntersRoleName');
 
-    // Dynamic Global Vars:
+    // Global Dynamic Vars:
     // (Organized by Resource)
     //
     let ListOfS3Buckets: string[] = [
@@ -41,7 +46,8 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       `tlz-config-central-${MainAWSAccount}`,
       `tlz-guardduty-central-${MainAWSAccount}`,
       `tlz-vpc-flowlogs-central-${MainAWSAccount}`,
-    ]
+    ];
+
     let TLZCloudTrailBucket: any;
     let TLZConfigBucket: any;
     let TLZGuardDutyBucket: any;
@@ -262,12 +268,12 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //HUNTERs:
     //
     const HuntersIamRole = new iam.Role(this, 'IamHuntersRole', {
-      assumedBy: new iam.ArnPrincipal(`arn:aws:iam::${HuntersAccountId}:root`),
-      externalIds: [`${HuntersExternalId}`],
+      assumedBy: new iam.AccountPrincipal(HuntersAccountId),
+      externalIds: [HuntersExternalId],
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(`${HuntersIamPolicyName}`),
+        iam.ManagedPolicy.fromAwsManagedPolicyName(HuntersIamPolicyName),
       ],
-      roleName: `${HuntersRoleName}`,
+      roleName: HuntersRoleName,
     });
 
   } //constructor

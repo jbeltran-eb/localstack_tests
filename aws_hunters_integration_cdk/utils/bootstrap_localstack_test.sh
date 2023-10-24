@@ -1,4 +1,4 @@
-cdklocal synth -c MainAWSAccount=000000000000 \
+cdklocal bootstrap -c MainAWSAccount=000000000000 \
 -c HuntersBucketBaseName=tlz-cloudtrail-central \
 -c HuntersAccountId=685648138888 \
 -c HuntersExternalId=9c7779b2-4bf8-4d04-9ec8-67186102afc1 \
