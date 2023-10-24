@@ -20,9 +20,9 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     //General
     const MainAWSAccount = this.node.tryGetContext('MainAWSAccount')
-    const EnableS3SNSEventNotification = this.node.tryGetContext('EnableS3SNSEventNotification')
-    const CreateSQSQueues = this.node.tryGetContext('CreateSQSQueues')
-    const CreateListOfS3Buckets = this.node.tryGetContext('CreateListOfS3Buckets')
+    const EnableS3SNSEventNotification = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? true : false )
+    const CreateSQSQueues = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? true : false)
+    const CreateListOfS3Buckets = (this.node.tryGetContext('CreateListOfS3Buckets') === 'false' ? true : false)
 
     //Hunters
     const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName')
