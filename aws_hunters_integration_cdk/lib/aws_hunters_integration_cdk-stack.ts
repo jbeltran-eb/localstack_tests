@@ -53,28 +53,45 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //Cloudformation Parameters:
     //
 
+    // Hunters Params:
     const HuntersKmsArns = new CfnParameter(this, 'HuntersKmsArns', {
       default: '',
-      description: 'KMS ARN if required - Format: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab',
+      description: 'KMS ARN when required',
+      type: 'String',
+      allowedPattern: "arn:aws:kms:(af|ap|ca|eu|me|sa|us)-(central|north|(north(?:east|west))|south|south(?:east|west)|east|west)-\d+:[0-9]{12}:key\/[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}",
+    }).valueAsString;
+
+    const HuntersExternalId = new CfnParameter(this, 'HuntersExternalId', {
+      default: '',
+      description: 'Hunters Given External Id',
       type: 'String',
     }).valueAsString;
 
-    // Variables specific for Hunters:
-    // Notes:
-    //  - Kms Arns currently fixed to "dummy" value for testing
-    //
-    //
-    //let HuntersKmsArns: string = ""; //Use in future a value if given/required: "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-    let HuntersBucketNames: string[] = [
-      `${ListOfS3Buckets[0]}`
-    ]
+    const HuntersAccountId = new CfnParameter(this, 'HuntersAccountId', {
+      default: '',
+      description: 'Hunters AWS Account Id',
+      type: 'String',
+      allowedPattern: "[0-9]{12}"
+    }).valueAsString;
 
-    let HuntersPolicyAndRoleId: string = "76d0638c" //It's not defined exactly the criteria currently used in CFN for this ID - Pending of Definition
-    let HuntersIamPolicyName: string = `hunters-integration-policy-${HuntersPolicyAndRoleId}`  
-    let HuntersRoleName: string = `hunters-integration-role-${HuntersPolicyAndRoleId}`   
-    let HuntersAccountId: string = "000000000000"                              //It's not strictly the same that account were this cdk is deployed
-                                                                              // i.e: 685648138888
-    let HuntersExternalId: string = "9c7779b2-4bf8-4d04-9ec8-67186102afc1"    //Reported/Given by Hunters
+    const HuntersRoleName = new CfnParameter(this, 'HuntersRoleName', {
+      default: 'hunters-integration-role',
+      description: 'Name for the Hunters Role',
+      type: 'String',
+    }).valueAsString;
+
+    const HuntersIamPolicyName = new CfnParameter(this, 'HuntersIamPolicyName', {
+      default: 'hunters-integration-policy',
+      description: 'Name for the Hunters Policy',
+      type: 'String',
+    }).valueAsString;
+
+    const HuntersBucketNames = new CfnParameter(this, 'HuntersBucketNames', {
+      default: `${ListOfS3Buckets[0]}`,
+      description: 'List of S3 Buckets for Hunters',
+      type: 'CommaDelimitedList',
+    }).valueAsList;
+
 
     // Create the S3 Buckets:
     // Notes:
@@ -221,8 +238,9 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
           's3:PutBucketNotification',
         ],
         resources: [
-          `arn:aws:s3:::${HuntersBucketNames[0]}`,
-          `arn:aws:s3:::${HuntersBucketNames[0]}/*`  
+          `arn:aws:s3:::${cdk.Fn.select(0, HuntersBucketNames)}`,
+          `arn:aws:s3:::${cdk.Fn.select(0, HuntersBucketNames)}/*`
+
         ],
       }),
       new iam.PolicyStatement({
