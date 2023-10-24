@@ -28,6 +28,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     console.log('Create List of S3 Buckets: %s',CreateListOfS3Buckets);
     console.log('Create SQS Queues: %s', CreateSQSQueues);
     console.log('Enable S3 SNS Event Notifications: %s',EnableS3SNSEventNotification);
+    console.log('--- END ---')
 
     //Hunters
     const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName');
@@ -185,6 +186,19 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     }
 
+    //ROLE SECTIONs
+    // Note: 
+    //  - Move to specific and separated construct in future. 
+    //
+
+    //HUNTERs:
+    //
+    const HuntersIamRole = new iam.Role(this, 'IamHuntersRole', {
+      assumedBy: new iam.AccountPrincipal(HuntersAccountId),
+      externalIds: [HuntersExternalId],
+      roleName: HuntersRoleName,
+    });
+
     //POLICY SECTIONs
     // Note: 
     //  - Move to specific and separated construct in future. 
@@ -242,7 +256,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       }),
     ];
 
-    // Only add when decrypt required:
+    // Only add KMS when decrypt required:
     if (HuntersKmsArns && HuntersKmsArns.length > 0) {
       HuntersPolicyStatements.push(new iam.PolicyStatement({
         sid: 'BucketsDecrypt',
@@ -252,29 +266,15 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       }));
     }
 
-    //Note:
-    //
-    const HuntersIamPolicy = new iam.ManagedPolicy(this, 'IamHuntersPolicy', {
-      managedPolicyName: `${HuntersIamPolicyName}`,
+    const HuntersIamPolicy = new iam.Policy(this, 'IamHuntersPolicy', {
       statements: HuntersPolicyStatements,
     });
 
-
-    //ROLE SECTIONs
-    // Note: 
-    //  - Move to specific and separated construct in future. 
+    //ATTACHING ROLES AND POLICIES
     //
 
     //HUNTERs:
-    //
-    const HuntersIamRole = new iam.Role(this, 'IamHuntersRole', {
-      assumedBy: new iam.AccountPrincipal(HuntersAccountId),
-      externalIds: [HuntersExternalId],
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(HuntersIamPolicyName),
-      ],
-      roleName: HuntersRoleName,
-    });
+    HuntersIamPolicy.attachToRole(HuntersIamRole)
 
   } //constructor
 } // main class
