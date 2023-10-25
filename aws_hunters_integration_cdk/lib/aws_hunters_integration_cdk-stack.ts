@@ -39,6 +39,14 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     const HuntersIamPolicyName	= this.node.tryGetContext('HuntersIamPolicyName');
     const HuntersRoleName	= this.node.tryGetContext('HuntersRoleName');
 
+    //Wiz
+    const WizBucketBaseName = this.node.tryGetContext('WizBucketBaseName');
+    const WizBucketName = `${WizBucketBaseName}-${MainAWSAccount}`
+    const WizAccountId=this.node.tryGetContext('WizAccountId');
+    const WizExternalId=this.node.tryGetContext('WizExternalId');
+    const WizAllowCloudTrailBucketAccessIamPolicyName=this.node.tryGetContext('WizAllowCloudTrailBucketAccessIamPolicyName')
+    const WizRoleName=this.node.tryGetContext('WizRoleName');
+
     // Global Dynamic Vars:
     // (Organized by Resource)
     //
@@ -188,23 +196,33 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     //ROLE SECTIONs
     // Note: 
-    //  - Move to specific and separated construct in future. 
+    //  - Move to specific and separated constructs in future. 
+    //    when possible
     //
 
     //HUNTERs:
     //
-    const HuntersIamRole = new iam.Role(this, 'IamHuntersRole', {
+    const HuntersIamRole = new iam.Role(this, 'HuntersIamRole', {
       assumedBy: new iam.AccountPrincipal(HuntersAccountId),
       externalIds: [HuntersExternalId],
       roleName: HuntersRoleName,
     });
+
+    //WIZ:
+    const WizAccessIamRole = new iam.Role(this,'WizAccessIamRole',{
+      assumedBy: new iam.AccountPrincipal(WizAccountId),
+      externalIds: [WizExternalId],
+      roleName: WizRoleName,
+    });
+
 
     //POLICY SECTIONs
     // Note: 
     //  - Move to specific and separated construct in future. 
     //
 
-    // HUNTERs:
+    // HUNTERs POLICY:
+    //
     const HuntersPolicyStatements = [
       new iam.PolicyStatement({
         sid: 'BucketsAccess',
@@ -266,15 +284,56 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       }));
     }
 
-    const HuntersIamPolicy = new iam.Policy(this, 'IamHuntersPolicy', {
+    const HuntersIamPolicy = new iam.Policy(this, 'HuntersIamPolicy', {
       statements: HuntersPolicyStatements,
+      policyName: HuntersIamPolicyName
+    });
+
+    //WIZ POLICY
+    //
+    const WizAllowCloudTrailBucketAccessStatements = [
+      new iam.PolicyStatement({
+        sid: 'AllowWizAccessCloudtrailS3ListGetLocation',
+        effect: iam.Effect.ALLOW,
+        actions: [
+          's3:GetBucketLocation',
+          's3:ListBucket'
+        ],
+        resources: [`arn:aws:s3:::${WizBucketName}`],
+        conditions: {
+          'Bool': {
+            'aws:SecureTransport': 'true'
+          }
+        }
+      }),
+      new iam.PolicyStatement({ 
+        sid: 'AllowWizAccessCloudtrailS3Get',
+        effect: iam.Effect.ALLOW,
+        actions: [
+          's3:GetObject'
+        ],
+        resources: [`arn:aws:s3:::${WizBucketName}/*`],
+        conditions: {
+          'Bool': {
+            'aws:SecureTransport': 'true'
+          }
+        }
+      }),
+    ];
+
+    const WizAllowCloudTrailBucketAccessIamPolicy = new iam.Policy(this, 'WizAllowCloudTrailBucketAccessIamPolicy', {
+      statements: WizAllowCloudTrailBucketAccessStatements,
+      policyName: WizAllowCloudTrailBucketAccessIamPolicyName
     });
 
     //ATTACHING ROLES AND POLICIES
     //
 
     //HUNTERs:
-    HuntersIamPolicy.attachToRole(HuntersIamRole)
+    HuntersIamPolicy.attachToRole(HuntersIamRole);
+
+    //WIZ:
+    WizAllowCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
 
   } //constructor
 } // main class
