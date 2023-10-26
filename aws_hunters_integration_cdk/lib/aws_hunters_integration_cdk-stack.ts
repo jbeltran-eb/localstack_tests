@@ -49,10 +49,10 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       `tlz-vpc-flowlogs-central-${MainAWSAccount}`,
     ];
 
-    let TLZCloudTrailBucket: any;
-    let TLZConfigBucket: any;
-    let TLZGuardDutyBucket: any;
-    let TLZVPCFlowLogsBucket: any;
+    let TLZCloudTrailBucket: s3.IBucket;
+    let TLZConfigBucket: s3.IBucket;
+    let TLZGuardDutyBucket: s3.IBucket;
+    let TLZVPCFlowLogsBucket: s3.IBucket;
 
     let TLZCloudtrailLogsEventTopic: any;
     let TLZConfigLogsEventTopic: any;
