@@ -70,6 +70,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     let HuntersCloudTrailsQueue: any;
     let WizCloudTrailsQueue: any;
     let HuntersCloudTrailsQueueSubscription: any;
+    let WizCloudTrailsQueueSubscription: any;
 
     // Create the S3 Buckets:
     //
@@ -105,7 +106,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //
     if (CreateListOfS3Buckets){
 
-      // Hunters
+      // CloudTrail:
       TLZCloudtrailLogsEventTopic = new sns.Topic(this, 'TLZCloudtrailLogsEventTopic', {
         topicName: 'cloudtrail-logs-notify'
       });
@@ -133,9 +134,6 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //  - At this moment only creation object will be supported
     //  - Unfortunately localstack free-tier doesn't allow test this correctly
     //    . Notification is not supported at this layer. 
-    //    In addition, the lambda related code or functionalities using throws errors
-    //    during deployment because docker.sock volume is required. Unfortunately
-    //    "--volume" option is not mounting required volume under MacOS in localstack-cli 
     //
     if (EnableS3SNSEventNotification && CreateListOfS3Buckets){
 
@@ -192,6 +190,10 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
       TLZCloudtrailLogsEventTopic.addSubscription(HuntersCloudTrailsQueueSubscription);
 
+      WizCloudTrailsQueueSubscription = new snsSubscriptions.SqsSubscription(WizCloudTrailsQueue, {
+        rawMessageDelivery: true
+      });
+
     }
 
     //ROLE SECTIONs
@@ -220,6 +222,32 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     // Note: 
     //  - Move to specific and separated construct in future. 
     //
+
+    // CloudTrail Bucket Policy: - SNS Notify
+    //
+    const CloudTrailBucketPolicyStatements = [
+      new iam.PolicyStatement({
+        sid: 'AllowAWSS3Notification',
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+        actions: ['SNS:Publish'],
+        resources: [`arn:aws:sns:us-east-1:${MainAWSAccount}:${TLZCloudtrailLogsEventTopic}`],
+        conditions: {
+          'StringEquals': {
+            'aws:SourceAccount': `${MainAWSAccount}`,
+          },
+          'ArnLike': {
+            'aws:SourceArn': `arn:aws:s3:*:*:${ListOfS3Buckets[0]}`,
+          },
+        },
+      }),
+    ];
+
+    const TLZCloudtrailLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZCloudtrailLogsEventTopicPolicy', {
+      topics: [TLZCloudtrailLogsEventTopic],
+    });
+    
+    TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyStatements[0]);
 
     // HUNTERs POLICY:
     //
