@@ -231,7 +231,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
         actions: ['SNS:Publish'],
-        resources: [`arn:aws:sns:us-east-1:${MainAWSAccount}:${TLZCloudtrailLogsEventTopic}`],
+        resources: [TLZCloudtrailLogsEventTopic.topicArn],
         conditions: {
           'StringEquals': {
             'aws:SourceAccount': `${MainAWSAccount}`,
