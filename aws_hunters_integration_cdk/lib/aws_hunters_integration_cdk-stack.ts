@@ -13,22 +13,14 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines the stack:
-    // 
-
-    //Context Variables/Const:
+    //Context Variables/Constants:
 
     //General
     const MainAWSAccount = this.node.tryGetContext('MainAWSAccount');
-    const EnableS3SNSEventNotification: boolean = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? false : true );
-    const CreateSQSQueues: boolean = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? false : true);
     const CreateListOfS3Buckets: boolean = (this.node.tryGetContext('CreateListOfS3Buckets') === 'false' ? false : true);
-    
-    console.log('-- ENABLED FEATURES --');
-    console.log('Create List of S3 Buckets: %s',CreateListOfS3Buckets);
-    console.log('Create SQS Queues: %s', CreateSQSQueues);
-    console.log('Enable S3 SNS Event Notifications: %s',EnableS3SNSEventNotification);
-    console.log('--- END ---')
+    const CreateSNSTopics: boolean = (this.node.tryGetContext('CreateSNSTopics') === 'false' ? false : true);
+    const CreateSQSQueues: boolean = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? false : true);
+    const EnableS3SNSEventNotification: boolean = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? false : true );
 
     //Hunters
     const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName');
@@ -72,7 +64,18 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     let HuntersCloudTrailsQueueSubscription: any;
     let WizCloudTrailsQueueSubscription: any;
 
-    // Create the S3 Buckets:
+    // --- MAIN STACK CREATION --
+
+    //Flag Status Reported from Config
+    //
+    console.log('-- CONFIGURATION FLAGs FOR STACK APP --');
+    console.log('Create List of S3 Buckets: %s', CreateListOfS3Buckets);
+    console.log('Create SNS Topics: %s', CreateSNSTopics);
+    console.log('Create SQS Queues: %s', CreateSQSQueues);
+    console.log('Enable S3 SNS Event Notifications: %s', EnableS3SNSEventNotification);
+    console.log('--- END ---')
+
+    // Create (or import) the S3 Buckets:
     //
     if (CreateListOfS3Buckets){
 
@@ -100,11 +103,18 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
         versioned: false
       });
 
+    }else{
+
+      TLZCloudTrailBucket = s3.Bucket.fromBucketName(this, ListOfS3Buckets[0], ListOfS3Buckets[0]);
+      TLZConfigBucket = s3.Bucket.fromBucketName(this, ListOfS3Buckets[1], ListOfS3Buckets[1]);
+      TLZGuardDutyBucket = s3.Bucket.fromBucketName(this, ListOfS3Buckets[2], ListOfS3Buckets[2]);
+      TLZVPCFlowLogsBucket = s3.Bucket.fromBucketName(this, ListOfS3Buckets[3], ListOfS3Buckets[3]);
+
     }
 
     //Create the SNS Topics:
     //
-    if (CreateListOfS3Buckets){
+    if (CreateSNSTopics){
 
       // CloudTrail:
       TLZCloudtrailLogsEventTopic = new sns.Topic(this, 'TLZCloudtrailLogsEventTopic', {
@@ -135,7 +145,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     //  - Unfortunately localstack free-tier doesn't allow test this correctly
     //    . Notification is not supported at this layer. 
     //
-    if (EnableS3SNSEventNotification && CreateListOfS3Buckets){
+    if (EnableS3SNSEventNotification && CreateSNSTopics){
 
       TLZCloudTrailBucket.addEventNotification(
         // Modify the `s3.EventType.*` to handle other object operations.
@@ -225,7 +235,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     // CloudTrail Bucket Policy: - SNS Notify
     //
-    const CloudTrailBucketPolicyStatements = [
+    const CloudTrailBucketPolicyForSNSStatements = [
       new iam.PolicyStatement({
         sid: 'AllowAWSS3Notification',
         effect: iam.Effect.ALLOW,
@@ -247,7 +257,14 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       topics: [TLZCloudtrailLogsEventTopic],
     });
     
-    TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyStatements[0]);
+    TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
+
+    // CloudTrail SNS Policy: SQS Notify
+    const CloudTrailSNSPolicyForSQSStatements = [
+
+    ]
+
+
 
     // HUNTERs POLICY:
     //

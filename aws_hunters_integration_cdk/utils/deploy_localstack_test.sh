@@ -12,5 +12,6 @@ cdklocal deploy -c MainAWSAccount=000000000000 \
 -c WizRoleName=wiz-integration-role \
 -c EnableS3SNSEventNotification=false \
 -c CreateSQSQueues=true \
--c CreateListOfS3Buckets=true \
+-c CreateListOfS3Buckets=false \
+-c CreateSNSTopics=true \
 -v
