@@ -204,6 +204,8 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
         rawMessageDelivery: true
       });
 
+      TLZCloudtrailLogsEventTopic.addSubscription(WizCloudTrailsQueueSubscription);
+
     }
 
     //ROLE SECTIONs
@@ -232,39 +234,6 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     // Note: 
     //  - Move to specific and separated construct in future. 
     //
-
-    // CloudTrail Bucket Policy: - SNS Notify
-    //
-    const CloudTrailBucketPolicyForSNSStatements = [
-      new iam.PolicyStatement({
-        sid: 'AllowAWSS3Notification',
-        effect: iam.Effect.ALLOW,
-        principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
-        actions: ['SNS:Publish'],
-        resources: [TLZCloudtrailLogsEventTopic.topicArn],
-        conditions: {
-          'StringEquals': {
-            'aws:SourceAccount': `${MainAWSAccount}`,
-          },
-          'ArnLike': {
-            'aws:SourceArn': `arn:aws:s3:*:*:${ListOfS3Buckets[0]}`,
-          },
-        },
-      }),
-    ];
-
-    const TLZCloudtrailLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZCloudtrailLogsEventTopicPolicy', {
-      topics: [TLZCloudtrailLogsEventTopic],
-    });
-    
-    TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
-
-    // CloudTrail SNS Policy: SQS Notify
-    const CloudTrailSNSPolicyForSQSStatements = [
-
-    ]
-
-
 
     // HUNTERs POLICY:
     //
@@ -371,7 +340,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       policyName: WizAllowCloudTrailBucketAccessIamPolicyName
     });
 
-    //ATTACHING ROLES AND POLICIES
+    //ATTACHING ROLES AND POLICIES FOR SPECIFIC PRODUCTs
     //
 
     //HUNTERs:
@@ -379,6 +348,93 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     //WIZ:
     WizAllowCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
+
+
+    //ATTACHING POLICIES FOR SNS and SQS:
+
+    // CloudTrail Bucket Policy: - SNS Notify
+    //
+    const CloudTrailBucketPolicyForSNSStatements = [
+      new iam.PolicyStatement({
+        sid: 'AllowAWSS3Notification',
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+        actions: ['SNS:Publish'],
+        resources: [TLZCloudtrailLogsEventTopic.topicArn],
+        conditions: {
+          'StringEquals': {
+            'aws:SourceAccount': `${MainAWSAccount}`,
+          },
+          'ArnLike': {
+            'aws:SourceArn': `arn:aws:s3:*:*:${ListOfS3Buckets[0]}`,
+          },
+        },
+      }),
+    ];
+
+    const TLZCloudtrailLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZCloudtrailLogsEventTopicPolicy', {
+      topics: [TLZCloudtrailLogsEventTopic],
+    });
+    
+    TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
+
+    // CloudTrail SNS Policy: SQS Notify for Wiz
+    const CloudTrailSNSPolicyForSQSWizStatements = [
+      new iam.PolicyStatement({
+        sid: 'Allow-SNS-SendMessage',
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal('sns.amazonaws.com')],
+        actions: ['sqs:SendMessage'],
+        resources: [WizCloudTrailsQueue.queueArn],
+        conditions: {
+          ArnEquals: {
+            'aws:SourceArn': TLZCloudtrailLogsEventTopic.topicArn,
+          },
+        },
+      }),
+      new iam.PolicyStatement({
+        sid: 'Allow-WizAccess-RecvDeleteMsg',
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ArnPrincipal(WizAccessIamRole.roleArn)],
+        actions: ['sqs:DeleteMessage', 'sqs:ReceiveMessage'],
+        resources: [WizCloudTrailsQueue.queueArn],
+      }),
+    ]
+
+    const CloudTrailSNSPolicyForSQSWiz = new sqs.QueuePolicy(this, 'CloudTrailSNSPolicyForSQSWiz', {
+      queues: [WizCloudTrailsQueue],
+    });
+
+    CloudTrailSNSPolicyForSQSWiz.document.addStatements(CloudTrailSNSPolicyForSQSWizStatements[0],CloudTrailSNSPolicyForSQSWizStatements[1]);
+
+    // CloudTrail SNS Policy: SQS Notify for Hunter
+    const CloudTrailSNSPolicyForSQSHunterStatements = [
+      new iam.PolicyStatement({
+        sid: 'Allow-SNS-SendMessage',
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal('sns.amazonaws.com')],
+        actions: ['sqs:SendMessage'],
+        resources: [HuntersCloudTrailsQueue.queueArn],
+        conditions: {
+          ArnEquals: {
+            'aws:SourceArn': TLZCloudtrailLogsEventTopic.topicArn,
+          },
+        },
+      }),
+      new iam.PolicyStatement({
+        sid: 'Allow-HuntersAccess-RecvDeleteMsg',
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ArnPrincipal(HuntersIamRole.roleArn)],
+        actions: ['sqs:DeleteMessage', 'sqs:ReceiveMessage'],
+        resources: [HuntersCloudTrailsQueue.queueArn],
+      }),
+    ]
+
+    const CloudTrailSNSPolicyForSQSHunters = new sqs.QueuePolicy(this, 'CloudTrailSNSPolicyForSQSHunters', {
+      queues: [HuntersCloudTrailsQueue],
+    });
+
+    CloudTrailSNSPolicyForSQSHunters.document.addStatements(CloudTrailSNSPolicyForSQSHunterStatements[0],CloudTrailSNSPolicyForSQSHunterStatements[1]);
 
   } //constructor
 } // main class
