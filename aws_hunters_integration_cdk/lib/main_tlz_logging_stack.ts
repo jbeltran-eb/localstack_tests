@@ -183,23 +183,6 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
 
     }
 
-    //Create the SQS Queues:
-    //
-    if (CreateSQSQueues){
-      //Hunters:
-      HuntersCloudTrailsQueue = new sqs.Queue(this, 'HuntersCloudTrailQueue', {
-        queueName: 'hunters-cloudtrail-logs-queue',
-        //visibilityTimeout: Duration.days(4),
-      });
-
-      //WIZ:
-      WizCloudTrailsQueue = new sqs.Queue(this, 'WizCloudTrailQueue', {
-        queueName: 'wiz-cloudtrail-logs-queue',
-        //visibilityTimeout: Duration.days(4),
-      });
-
-    }
-
     //Create SQS Subscription when required for corresponding SNS Topics
     //
     if (CreateSQSQueues && EnableS3SNSEventNotification){

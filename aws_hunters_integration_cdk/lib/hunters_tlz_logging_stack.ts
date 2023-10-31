@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { custom_context_param_stack_type } from '../lib/custom_types/custom_types'
 
@@ -16,6 +17,28 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
         console.log('-- [%s] CONFIGURATION FLAGs RECEIVED FROM MAIN STACK --',HuntersTLZCoreLoggingStack.name);
         console.log('Create List of S3 Buckets: %s', props.custom_user_stack_params.CreateListOfS3Buckets);
         console.log('--- END ---')
+
+        //Context Params:
+        //
+        const CreateSQSQueues: boolean = props.custom_user_stack_params.CreateSQSQueues
+
+        //Global Vars
+        //
+        let HuntersCloudTrailsQueue: any;
+        let HuntersCloudTrailsQueueSubscription: any;
+
+        //Create the SQS Queues:
+        //
+        if (CreateSQSQueues){
+            HuntersCloudTrailsQueue = new sqs.Queue(
+                this, 
+                'HuntersCloudTrailQueue', 
+                {
+                    queueName: 'hunters-cloudtrail-logs-queue',
+                    //visibilityTimeout: Duration.days(4),
+                }
+            );
+        }
 
     } //constructor
 } //NestedStack
