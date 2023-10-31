@@ -1,15 +1,14 @@
 import * as cdk from 'aws-cdk-lib';
-import {CfnParameter} from 'aws-cdk-lib';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3Notifications from 'aws-cdk-lib/aws-s3-notifications';
-
+import { custom_context_param_stack_type } from '../lib/custom_types/custom_types'
+import * as fs from 'fs';
 import { HuntersTLZCoreLoggingStack } from '../lib/hunters_tlz_logging_stack';
 import { WizTLZCoreLoggingStack } from '../lib/wiz_tlz_logging_stack';
-
 import { Construct } from 'constructs';
 
 export class MainTLZCoreLoggingStack extends cdk.Stack {
@@ -18,28 +17,37 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
 
     //Context Variables/Constants:
 
+    //Get Context Variables:
+    const cdkConfig = JSON.parse(fs.readFileSync('cdk.json', 'utf8'));
+    const contextParams = cdkConfig.context;
+    console.log('--- GETTING CONTEXT VARIABLES FROM cdk.json ---')
+    console.log('Type: %s', typeof contextParams)
+    console.log('Type custom_user_stack_params: %s', typeof contextParams['custom_user_stack_params']);
+    console.log(contextParams);
+    console.log('---')
+
     //General
-    const MainAWSAccount = this.node.tryGetContext('MainAWSAccount');
-    const CreateListOfS3Buckets: boolean = (this.node.tryGetContext('CreateListOfS3Buckets') === 'false' ? false : true);
-    const CreateSNSTopics: boolean = (this.node.tryGetContext('CreateSNSTopics') === 'false' ? false : true);
-    const CreateSQSQueues: boolean = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? false : true);
-    const EnableS3SNSEventNotification: boolean = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? false : true );
+    const MainAWSAccount: string                = contextParams['custom_user_stack_params'].MainAWSAccount;
+    const CreateListOfS3Buckets: boolean        = contextParams['custom_user_stack_params'].CreateListOfS3Buckets;
+    const CreateSNSTopics: boolean              = contextParams['custom_user_stack_params'].CreateSNSTopics;
+    const CreateSQSQueues: boolean              = contextParams['custom_user_stack_params'].CreateSQSQueues;
+    const EnableS3SNSEventNotification: boolean = contextParams['custom_user_stack_params'].EnableS3SNSEventNotification;
 
     // CloudTrail
     const CloudTrailBucketName = `${this.node.tryGetContext('CloudTrailBucketBaseName')}-${MainAWSAccount}`
 
     //Hunters
-    const HuntersAccountId	= this.node.tryGetContext('HuntersAccountId');
-    const HuntersExternalId	= this.node.tryGetContext('HuntersExternalId');
-    const HuntersKmsArns = this.node.tryGetContext('HuntersKmsArns');
-    const HuntersCloudTrailBucketAccessIamPolicyName	= this.node.tryGetContext('HuntersCloudTrailBucketAccessIamPolicyName');
-    const HuntersRoleName	= this.node.tryGetContext('HuntersRoleName');
+    const HuntersAccountId                            = contextParams['custom_user_stack_params'].HuntersAccountId;
+    const HuntersExternalId                           = contextParams['custom_user_stack_params'].HuntersExternalId;
+    const HuntersKmsArns                              = contextParams['custom_user_stack_params'].HuntersKmsArns;
+    const HuntersCloudTrailBucketAccessIamPolicyName	= contextParams['custom_user_stack_params'].HuntersCloudTrailBucketAccessIamPolicyName;
+    const HuntersRoleName	                            = contextParams['custom_user_stack_params'].HuntersRoleName;
 
     //Wiz
-    const WizAccountId=this.node.tryGetContext('WizAccountId');
-    const WizExternalId=this.node.tryGetContext('WizExternalId');
-    const WizCloudTrailBucketAccessIamPolicyName=this.node.tryGetContext('WizCloudTrailBucketAccessIamPolicyName')
-    const WizRoleName=this.node.tryGetContext('WizRoleName');
+    const WizAccountId                            = contextParams['custom_user_stack_params'].WizAccountId;
+    const WizExternalId                           = contextParams['custom_user_stack_params'].WizExternalId;
+    const WizCloudTrailBucketAccessIamPolicyName  = contextParams['custom_user_stack_params'].WizCloudTrailBucketAccessIamPolicyName;
+    const WizRoleName                             = contextParams['custom_user_stack_params'].WizRoleName;
 
     // Global Dynamic Vars:
     // (Organized by Resource)
@@ -71,10 +79,10 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     //Flag Status Reported from Config
     //
     console.log('-- CONFIGURATION FLAGs FOR STACK APP --');
-    console.log('Create List of S3 Buckets: %s', CreateListOfS3Buckets);
-    console.log('Create SNS Topics: %s', CreateSNSTopics);
-    console.log('Create SQS Queues: %s', CreateSQSQueues);
-    console.log('Enable S3 SNS Event Notifications: %s', EnableS3SNSEventNotification);
+    console.log('Create List of S3 Buckets: %s'         , CreateListOfS3Buckets);
+    console.log('Create SNS Topics: %s'                 , CreateSNSTopics);
+    console.log('Create SQS Queues: %s'                 , CreateSQSQueues);
+    console.log('Enable S3 SNS Event Notifications: %s' , EnableS3SNSEventNotification);
     console.log('--- END ---')
 
     // Create (or import) the S3 Buckets:
@@ -437,6 +445,23 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     });
 
     CloudTrailSNSPolicyForSQSHunters.document.addStatements(CloudTrailSNSPolicyForSQSHunterStatements[0],CloudTrailSNSPolicyForSQSHunterStatements[1]);
+
+
+    //HUNTERs NESTED STACK:
+    new HuntersTLZCoreLoggingStack(this,
+      'HuntersTLZCoreLoggingStack', 
+      { 
+        custom_user_stack_params: contextParams['custom_user_stack_params'] as custom_context_param_stack_type,
+      }
+    );
+
+    //WIZ NESTED STACK:
+    new WizTLZCoreLoggingStack(this,
+      'WizTLZCoreLoggingStack',
+      { 
+        custom_user_stack_params: contextParams['custom_user_stack_params'] as custom_context_param_stack_type,
+      }
+    );
 
   } //constructor
 } // main class

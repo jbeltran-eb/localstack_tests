@@ -38,6 +38,7 @@ The only requirements to run this project are:
 
 |COMMAND|DESCRIPTION|
 |:---:|:---:|
+|`npm install`|Generate all the node modules and projects according package.json|
 |`npm run build`|Compile typescript to js|
 |`npm run watch`|Watch for changes and compile|
 |`npm run test`|Perform the jest unit tests|

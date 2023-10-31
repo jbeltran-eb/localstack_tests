@@ -58,6 +58,24 @@
     "@aws-cdk/aws-efs:mountTargetOrderInsensitiveLogicalId": true,
     "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": true,
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
-    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true
+    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
+    "custom_user_stack_params": {
+      "MainAWSAccount": "000000000000",
+      "CloudTrailBucketBaseName": "tlz-cloudtrail-central",
+      "HuntersAccountId": "685648138888",
+      "HuntersExternalId": "9c7779b2-4bf8-4d04-9ec8-67186102afc1",
+      "HuntersKmsArns": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
+      "HuntersCloudTrailBucketAccessIamPolicyName": "hunters-integration-policy",
+      "HuntersRoleName": "hunters-integration-role",
+      "WizBucketBaseName": "tlz-cloudtrail-central",
+      "WizAccountId": "197171649850",
+      "WizExternalId": "7d2dd322-8576-429b-b6e7-b4bb94b48d84",
+      "WizCloudTrailBucketAccessIamPolicyName": "WizCloudTrailBucketAccessPolicy",
+      "WizRoleName": "wiz-integration-role",
+      "EnableS3SNSEventNotification": false,
+      "CreateSQSQueues": true,
+      "CreateListOfS3Buckets": true,
+      "CreateSNSTopics": true      
+    }
   }
 }
