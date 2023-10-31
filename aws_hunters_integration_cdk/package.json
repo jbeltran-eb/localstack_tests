@@ -1,8 +1,8 @@
 {
-  "name": "aws_hunters_integration_cdk",
+  "name": "main_tlz_logging_stack_eb",
   "version": "0.1.0",
   "bin": {
-    "aws_hunters_integration_cdk": "bin/aws_hunters_integration_cdk.js"
+    "main_tlz_logging_stack_eb": "bin/main_tlz_logging_stack_eb.js"
   },
   "scripts": {
     "build": "tsc",
