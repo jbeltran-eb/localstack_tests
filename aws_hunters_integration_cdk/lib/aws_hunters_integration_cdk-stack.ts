@@ -22,21 +22,20 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
     const CreateSQSQueues: boolean = (this.node.tryGetContext('CreateSQSQueues') === 'false' ? false : true);
     const EnableS3SNSEventNotification: boolean = (this.node.tryGetContext('EnableS3SNSEventNotification') === 'false' ? false : true );
 
+    // CloudTrail
+    const CloudTrailBucketName = `${this.node.tryGetContext('CloudTrailBucketBaseName')}-${MainAWSAccount}`
+
     //Hunters
-    const HunterBucketBaseName = this.node.tryGetContext('HuntersBucketBaseName');
-    const HuntersBucketName	= `${HunterBucketBaseName}-${MainAWSAccount}`;
     const HuntersAccountId	= this.node.tryGetContext('HuntersAccountId');
     const HuntersExternalId	= this.node.tryGetContext('HuntersExternalId');
     const HuntersKmsArns = this.node.tryGetContext('HuntersKmsArns');
-    const HuntersIamPolicyName	= this.node.tryGetContext('HuntersIamPolicyName');
+    const HuntersCloudTrailBucketAccessIamPolicyName	= this.node.tryGetContext('HuntersCloudTrailBucketAccessIamPolicyName');
     const HuntersRoleName	= this.node.tryGetContext('HuntersRoleName');
 
     //Wiz
-    const WizBucketBaseName = this.node.tryGetContext('WizBucketBaseName');
-    const WizBucketName = `${WizBucketBaseName}-${MainAWSAccount}`
     const WizAccountId=this.node.tryGetContext('WizAccountId');
     const WizExternalId=this.node.tryGetContext('WizExternalId');
-    const WizAllowCloudTrailBucketAccessIamPolicyName=this.node.tryGetContext('WizAllowCloudTrailBucketAccessIamPolicyName')
+    const WizCloudTrailBucketAccessIamPolicyName=this.node.tryGetContext('WizCloudTrailBucketAccessIamPolicyName')
     const WizRoleName=this.node.tryGetContext('WizRoleName');
 
     // Global Dynamic Vars:
@@ -237,7 +236,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     // HUNTERs POLICY:
     //
-    const HuntersPolicyStatements = [
+    const HuntersCloudTrailBucketAccessPolicyStatements = [
       new iam.PolicyStatement({
         sid: 'BucketsAccess',
         effect: iam.Effect.ALLOW,
@@ -249,8 +248,8 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
           's3:PutBucketNotification',
         ],
         resources: [
-          `arn:aws:s3:::${HuntersBucketName}`,
-          `arn:aws:s3:::${HuntersBucketName}/*`
+          `arn:aws:s3:::${CloudTrailBucketName}`,
+          `arn:aws:s3:::${CloudTrailBucketName}/*`
 
         ],
       }),
@@ -290,7 +289,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
 
     // Only add KMS when decrypt required:
     if (HuntersKmsArns && HuntersKmsArns.length > 0) {
-      HuntersPolicyStatements.push(new iam.PolicyStatement({
+      HuntersCloudTrailBucketAccessPolicyStatements.push(new iam.PolicyStatement({
         sid: 'BucketsDecrypt',
         effect: iam.Effect.ALLOW,
         actions: ['kms:Decrypt'],
@@ -298,14 +297,14 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       }));
     }
 
-    const HuntersIamPolicy = new iam.Policy(this, 'HuntersIamPolicy', {
-      statements: HuntersPolicyStatements,
-      policyName: HuntersIamPolicyName
+    const HuntersCloudTrailBucketAccessIamPolicy = new iam.Policy(this, 'HuntersCloudTrailBucketAccessIamPolicy', {
+      statements: HuntersCloudTrailBucketAccessPolicyStatements,
+      policyName: HuntersCloudTrailBucketAccessIamPolicyName
     });
 
     //WIZ POLICY
     //
-    const WizAllowCloudTrailBucketAccessStatements = [
+    const WizCloudTrailBucketAccessPolicyStatements = [
       new iam.PolicyStatement({
         sid: 'AllowWizAccessCloudtrailS3ListGetLocation',
         effect: iam.Effect.ALLOW,
@@ -313,7 +312,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
           's3:GetBucketLocation',
           's3:ListBucket'
         ],
-        resources: [`arn:aws:s3:::${WizBucketName}`],
+        resources: [`arn:aws:s3:::${CloudTrailBucketName}`],
         conditions: {
           'Bool': {
             'aws:SecureTransport': 'true'
@@ -326,7 +325,7 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
         actions: [
           's3:GetObject'
         ],
-        resources: [`arn:aws:s3:::${WizBucketName}/*`],
+        resources: [`arn:aws:s3:::${CloudTrailBucketName}/*`],
         conditions: {
           'Bool': {
             'aws:SecureTransport': 'true'
@@ -335,19 +334,19 @@ export class AwsHuntersIntegrationCdkStack extends cdk.Stack {
       }),
     ];
 
-    const WizAllowCloudTrailBucketAccessIamPolicy = new iam.Policy(this, 'WizAllowCloudTrailBucketAccessIamPolicy', {
-      statements: WizAllowCloudTrailBucketAccessStatements,
-      policyName: WizAllowCloudTrailBucketAccessIamPolicyName
+    const WizCloudTrailBucketAccessIamPolicy = new iam.Policy(this, 'WizCloudTrailBucketAccessIamPolicy', {
+      statements: WizCloudTrailBucketAccessPolicyStatements,
+      policyName: WizCloudTrailBucketAccessIamPolicyName
     });
 
     //ATTACHING ROLES AND POLICIES FOR SPECIFIC PRODUCTs
     //
 
     //HUNTERs:
-    HuntersIamPolicy.attachToRole(HuntersIamRole);
+    HuntersCloudTrailBucketAccessIamPolicy.attachToRole(HuntersIamRole);
 
     //WIZ:
-    WizAllowCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
+    WizCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
 
 
     //ATTACHING POLICIES FOR SNS and SQS:
