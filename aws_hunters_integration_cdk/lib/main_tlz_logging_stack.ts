@@ -28,11 +28,17 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     console.log('Type: %s', typeof contextParams)
     console.log('Type custom_tlz_logging_stack_params: %s', typeof contextParams['custom_tlz_logging_stack_params']);
     console.log(contextParams);
+    console.log('Cloudtrail Value: ', contextParams['custom_tlz_logging_stack_params'].CloudTrail.CreateBucket);
     console.log('---')
 
 
     // --- CREATING NESTED STACKs ---
     //
+
+    // Context Params:
+    const CloudTrail     : TLZLoggingStackContextCloudtrailParamType  = contextParams['custom_tlz_logging_stack_params'].CloudTrail;
+    const MainAWSAccount : string                                     = contextParams['custom_tlz_logging_stack_params'].MainAWSAccount;
+    const MainAWSRegion  : string                                     = contextParams['custom_tlz_logging_stack_params'].MainAWSRegion;
 
     //Dynamic Global Vars:
     let TLZCloudtrailLogsEventTopic: any;
@@ -41,9 +47,9 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     new CloudtrailTLZCoreLoggingStack(this,
       'CloudtrailTLZCoreLoggingStack',
       {
-        cloudtrail_tlz_logging_stack_params: contextParams['custom_tlz_logging_stack_params'].CloudTrail as TLZLoggingStackContextCloudtrailParamType,
-        main_aws_account: contextParams['custom_tlz_logging_stack_params'].MainAWSAccount as string,
-        main_aws_region: contextParams['custom_tlz_logging_stack_params'].MainAWSRegion as string,
+        cloudtrail_tlz_logging_stack_params: CloudTrail, 
+        main_aws_account: MainAWSAccount,
+        main_aws_region: MainAWSRegion,
         tlz_cloudtrail_logs_event_topic: TLZCloudtrailLogsEventTopic
 
       }
