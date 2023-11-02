@@ -59,23 +59,55 @@
     "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": true,
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
     "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
-    "custom_user_stack_params": {
+    "custom_tlz_logging_stack_params": {
       "MainAWSAccount": "000000000000",
-      "CloudTrailBucketBaseName": "tlz-cloudtrail-central",
-      "HuntersAccountId": "685648138888",
-      "HuntersExternalId": "9c7779b2-4bf8-4d04-9ec8-67186102afc1",
-      "HuntersKmsArns": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
-      "HuntersCloudTrailBucketAccessIamPolicyName": "hunters-integration-policy",
-      "HuntersRoleName": "hunters-integration-role",
-      "WizBucketBaseName": "tlz-cloudtrail-central",
-      "WizAccountId": "197171649850",
-      "WizExternalId": "7d2dd322-8576-429b-b6e7-b4bb94b48d84",
-      "WizCloudTrailBucketAccessIamPolicyName": "WizCloudTrailBucketAccessPolicy",
-      "WizRoleName": "wiz-integration-role",
-      "EnableS3SNSEventNotification": false,
-      "CreateSQSQueues": true,
-      "CreateListOfS3Buckets": true,
-      "CreateSNSTopics": true      
+      "MainAWSRegion": "us-east-1",
+      "CloudTrail":{
+        "BucketBaseName": "tlz-cloudtrail-central",
+        "BucketSNSTopicBaseName":"cloudtrail-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "Config":{
+        "BucketBaseName": "tlz-config-central",
+        "BucketSNSTopicBaseName":"config-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "GuardDuty":{
+        "BucketBaseName": "tlz-guardduty-central",
+        "BucketSNSTopicBaseName":"guardduty-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "VPCFlowLogs":{
+        "BucketBaseName": "tlz-vpc-flowlogs-central",
+        "BucketSNSTopicBaseName":"vpcflow-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "Hunters":{
+        "AccountId": "685648138888",
+        "ExternalId": "9c7779b2-4bf8-4d04-9ec8-67186102afc1",
+        "KmsArns": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
+        "CloudTrailBucketAccessIamPolicyName": "hunters-integration-policy",
+        "RoleName": "hunters-integration-role",
+        "CreateSQSQueue": true,
+        "QueueName": "hunters-cloudtrail-logs-queue"
+      },
+      "Wiz":{
+        "AccountId": "197171649850",
+        "ExternalId": "7d2dd322-8576-429b-b6e7-b4bb94b48d84",
+        "KmsArns": "",
+        "CloudTrailBucketAccessIamPolicyName": "WizCloudTrailBucketAccessPolicy",
+        "RoleName": "wiz-integration-role",
+        "CreateSQSQueue": true,
+        "QueueName": "wiz-cloudtrail-logs-queue"
+      }
     }
   }
 }

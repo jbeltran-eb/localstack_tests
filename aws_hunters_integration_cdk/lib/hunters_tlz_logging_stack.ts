@@ -1,10 +1,14 @@
 import * as cdk from 'aws-cdk-lib';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as sns from 'aws-cdk-lib/aws-sns';
+import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Construct } from 'constructs';
-import { custom_context_param_stack_type } from '../lib/custom_types/custom_types'
+import { TLZLoggingStackContextHuntersParamType } from './custom_types/tlz_logging_stack_custom_types'
 
 interface HuntersTLZCoreLoggingStackProps extends cdk.StackProps {
-    custom_user_stack_params: custom_context_param_stack_type;
+    hunters_tlz_logging_stack_params: TLZLoggingStackContextHuntersParamType;
+    TLZCloudtrailLogsEventTopic: sns.ITopic;
+    TLZCloudtrailS3SNSEventNotificationEnabled: boolean;
 }
 export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
     constructor(scope: Construct, id: string, props: HuntersTLZCoreLoggingStackProps) {
@@ -12,32 +16,51 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
 
         // --- HUNTERs  NESTED STACK CREATION --
 
-        //Flag Status Reported from Config
-        //
-        console.log('-- [%s] CONFIGURATION FLAGs RECEIVED FROM MAIN STACK --',HuntersTLZCoreLoggingStack.name);
-        console.log('Create List of S3 Buckets: %s', props.custom_user_stack_params.CreateListOfS3Buckets);
-        console.log('--- END ---')
-
         //Context Params:
         //
-        const CreateSQSQueues: boolean = props.custom_user_stack_params.CreateSQSQueues
+        const CreateSQSQueue                                : boolean = props.hunters_tlz_logging_stack_params.Hunters.CreateSQSQueue;
+        const QueueName                                     : string  = props.hunters_tlz_logging_stack_params.Hunters.QueueName;
+        const TLZCloudtrailS3SNSEventNotificationEnabled    : boolean = props.TLZCloudtrailS3SNSEventNotificationEnabled;
 
-        //Global Vars
-        //
-        let HuntersCloudTrailsQueue: any;
-        let HuntersCloudTrailsQueueSubscription: any;
+        //Global Passed Vars:
+        let TLZCloudtrailLogsEventTopic: any = props.TLZCloudtrailLogsEventTopic;
 
-        //Create the SQS Queues:
+        //Local Vars:
         //
-        if (CreateSQSQueues){
+        let HuntersCloudTrailsQueue             : any;
+        let HuntersCloudTrailsQueueSubscription : any;
+
+        //Flag Status Reported from Config
+        //
+        console.log('-- [%s] CONFIGURATION FLAGs RECEIVED FROM MAIN STACK --', HuntersTLZCoreLoggingStack.name);
+        console.log('Create SQS Queue: %s', CreateSQSQueue);
+        console.log('Name for the AWS SQS Queue: %s', QueueName);
+        console.log('--- END ---')
+
+        //Create the SQS Queues or Import it:
+        //
+        if (CreateSQSQueue){
             HuntersCloudTrailsQueue = new sqs.Queue(
                 this, 
                 'HuntersCloudTrailQueue', 
                 {
-                    queueName: 'hunters-cloudtrail-logs-queue',
+                    queueName: QueueName,
                     //visibilityTimeout: Duration.days(4),
                 }
             );
+        }else{
+            //WIP
+        }
+
+        //Create SQS Subscription when required for corresponding SNS Topics
+        //
+        if (TLZCloudtrailS3SNSEventNotificationEnabled){
+
+            HuntersCloudTrailsQueueSubscription = new snsSubscriptions.SqsSubscription(HuntersCloudTrailsQueue, {
+                rawMessageDelivery: true
+            });
+
+            TLZCloudtrailLogsEventTopic.addSubscription(HuntersCloudTrailsQueueSubscription);    
         }
 
     } //constructor
