@@ -2,11 +2,6 @@
 
     //HUNTERs:
     //
-    const HuntersIamRole = new iam.Role(this, 'HuntersIamRole', {
-        assumedBy: new iam.AccountPrincipal(HuntersAccountId),
-        externalIds: [HuntersExternalId],
-        roleName: HuntersRoleName,
-      });
   
       //WIZ:
       const WizAccessIamRole = new iam.Role(this,'WizAccessIamRole',{
@@ -129,8 +124,6 @@
       //ATTACHING ROLES AND POLICIES FOR SPECIFIC PRODUCTs
       //
   
-      //HUNTERs:
-      HuntersCloudTrailBucketAccessIamPolicy.attachToRole(HuntersIamRole);
   
       //WIZ:
       WizCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
@@ -193,32 +186,4 @@
   
       CloudTrailSNSPolicyForSQSWiz.document.addStatements(CloudTrailSNSPolicyForSQSWizStatements[0],CloudTrailSNSPolicyForSQSWizStatements[1]);
   
-      // CloudTrail SNS Policy: SQS Notify for Hunter
-      const CloudTrailSNSPolicyForSQSHunterStatements = [
-        new iam.PolicyStatement({
-          sid: 'Allow-SNS-SendMessage',
-          effect: iam.Effect.ALLOW,
-          principals: [new iam.ServicePrincipal('sns.amazonaws.com')],
-          actions: ['sqs:SendMessage'],
-          resources: [HuntersCloudTrailsQueue.queueArn],
-          conditions: {
-            ArnEquals: {
-              'aws:SourceArn': TLZCloudtrailLogsEventTopic.topicArn,
-            },
-          },
-        }),
-        new iam.PolicyStatement({
-          sid: 'Allow-HuntersAccess-RecvDeleteMsg',
-          effect: iam.Effect.ALLOW,
-          principals: [new iam.ArnPrincipal(HuntersIamRole.roleArn)],
-          actions: ['sqs:DeleteMessage', 'sqs:ReceiveMessage'],
-          resources: [HuntersCloudTrailsQueue.queueArn],
-        }),
-      ]
-  
-      const CloudTrailSNSPolicyForSQSHunters = new sqs.QueuePolicy(this, 'CloudTrailSNSPolicyForSQSHunters', {
-        queues: [HuntersCloudTrailsQueue],
-      });
-  
-      CloudTrailSNSPolicyForSQSHunters.document.addStatements(CloudTrailSNSPolicyForSQSHunterStatements[0],CloudTrailSNSPolicyForSQSHunterStatements[1]);
   

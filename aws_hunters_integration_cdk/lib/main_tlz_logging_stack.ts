@@ -59,7 +59,8 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
       { 
         hunters_tlz_logging_stack_params: HuntersConfig,
         TLZCloudtrailLogsEventTopic: CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
-        TLZCloudtrailS3SNSEventNotificationEnabled: CloudTrailNestedStack.EnableS3SNSEventNotification
+        TLZCloudtrailS3SNSEventNotificationEnabled: CloudTrailNestedStack.EnableS3SNSEventNotification,
+        TLZCloudTrailBucketName: CloudTrailNestedStack.TLZCloudTrailBucket.name
       }
     );
 
