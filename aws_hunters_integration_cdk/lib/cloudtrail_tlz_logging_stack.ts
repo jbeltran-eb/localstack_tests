@@ -80,7 +80,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
 
         };
 
-        // CloudTrail Bucket Policy for SNS Notifications
+        // CloudTrail Bucket Policy to allow SNS Notifications
         //
         const CloudTrailBucketPolicyForSNSStatements = [
             new iam.PolicyStatement({
