@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as s3Notifications from 'aws-cdk-lib/aws-s3-notifications';
 import { Construct } from 'constructs';
 import { TLZLoggingStackS3AndSNSContextParamType } from './custom_types/tlz_logging_stack_custom_types';
@@ -78,6 +79,33 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
             );
 
         };
+
+        // CloudTrail Bucket Policy for SNS Notifications
+        //
+        const CloudTrailBucketPolicyForSNSStatements = [
+            new iam.PolicyStatement({
+            sid: 'AllowAWSS3Notification',
+            effect: iam.Effect.ALLOW,
+            principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+            actions: ['SNS:Publish'],
+            resources: [this.TLZCloudtrailLogsEventTopic.topicArn],
+            conditions: {
+                'StringEquals': {
+                'aws:SourceAccount': `${MainAWSAccount}`,
+                },
+                'ArnLike': {
+                'aws:SourceArn': `arn:aws:s3:*:*:${BucketName}`,
+                },
+            },
+            }),
+        ];
+
+        const TLZCloudtrailLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZCloudtrailLogsEventTopicPolicy', {
+            topics: [this.TLZCloudtrailLogsEventTopic],
+        });
+
+        TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
+
 
         //Nested Stack OUTPUTs: - Properties in current implementation.
 
