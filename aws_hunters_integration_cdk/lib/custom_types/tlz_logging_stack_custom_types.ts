@@ -1,4 +1,4 @@
-type TLZLoggingStackS3AndSNSContextParamType = {
+export type TLZLoggingStackS3AndSNSContextParamType = {
     /**
      * Base Name for the S3 Bucket where the logs will be storage.
      */
@@ -22,7 +22,7 @@ type TLZLoggingStackS3AndSNSContextParamType = {
     EnableS3SNSEventNotification: boolean,
 }
 
-type TLZLoggingStackSQSAndProductContextParamType= {
+export type TLZLoggingStackSQSAndProductContextParamType = {
     /**
      * AWS Account Id for indicated Product.
      */
@@ -78,11 +78,12 @@ export type TLZLoggingStackContextParamType = {
     Wiz: TLZLoggingStackSQSAndProductContextParamType,
 };
 
-// Cloudtrail Context Params SubType:
-export type TLZLoggingStackContextCloudtrailParamType = Pick<TLZLoggingStackContextParamType, 'CloudTrail'>;
+// [DEPRECATED]
+// // Cloudtrail Context Params SubType:
+// export type TLZLoggingStackContextCloudtrailParamType = Pick<TLZLoggingStackContextParamType, 'CloudTrail'>;
 
-// Hunters Context Params SubType:
-export type TLZLoggingStackContextHuntersParamType = Pick<TLZLoggingStackContextParamType, 'Hunters'>;
+// // Hunters Context Params SubType:
+// export type TLZLoggingStackContextHuntersParamType = Pick<TLZLoggingStackContextParamType, 'Hunters'>;
 
-//Wiz Context Params SubType:
-export type TLZLoggingStackContextWizParamType = Pick<TLZLoggingStackContextParamType,'Wiz'>;
+// //Wiz Context Params SubType:
+// export type TLZLoggingStackContextWizParamType = Pick<TLZLoggingStackContextParamType,'Wiz'>;

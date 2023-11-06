@@ -1,14 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as s3Notifications from 'aws-cdk-lib/aws-s3-notifications';
-import { TLZLoggingStackContextParamType } from './custom_types/tlz_logging_stack_custom_types'
-import { TLZLoggingStackContextCloudtrailParamType } from './custom_types/tlz_logging_stack_custom_types'
-import { TLZLoggingStackContextHuntersParamType } from './custom_types/tlz_logging_stack_custom_types'
-import { TLZLoggingStackContextWizParamType } from './custom_types/tlz_logging_stack_custom_types'
+import { TLZLoggingStackS3AndSNSContextParamType } from './custom_types/tlz_logging_stack_custom_types';
+import { TLZLoggingStackSQSAndProductContextParamType } from './custom_types/tlz_logging_stack_custom_types';
 import * as fs from 'fs';
 import { CloudtrailTLZCoreLoggingStack } from '../lib/cloudtrail_tlz_logging_stack';
 import { HuntersTLZCoreLoggingStack } from '../lib/hunters_tlz_logging_stack';
@@ -25,10 +17,8 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     const cdkConfig = JSON.parse(fs.readFileSync('cdk.json', 'utf8'));
     const contextParams = cdkConfig.context;
     console.log('--- GETTING CONTEXT VARIABLES FROM cdk.json ---')
-    console.log('Type: %s', typeof contextParams)
     console.log('Type custom_tlz_logging_stack_params: %s', typeof contextParams['custom_tlz_logging_stack_params']);
     console.log(contextParams);
-    console.log('Cloudtrail Value: ', contextParams['custom_tlz_logging_stack_params'].CloudTrail.CreateBucket);
     console.log('---')
 
 
@@ -36,42 +26,50 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     //
 
     // Context Params:
-    const CloudTrail     : TLZLoggingStackContextCloudtrailParamType  = contextParams['custom_tlz_logging_stack_params'].CloudTrail;
-    const MainAWSAccount : string                                     = contextParams['custom_tlz_logging_stack_params'].MainAWSAccount;
-    const MainAWSRegion  : string                                     = contextParams['custom_tlz_logging_stack_params'].MainAWSRegion;
+    const MainAWSAccount : string = contextParams['custom_tlz_logging_stack_params'].MainAWSAccount;
+    const MainAWSRegion  : string = contextParams['custom_tlz_logging_stack_params'].MainAWSRegion;
 
     //Dynamic Global Vars:
-    let TLZCloudtrailLogsEventTopic: any;
+    let CloudTrailConfig     : TLZLoggingStackS3AndSNSContextParamType      = contextParams['custom_tlz_logging_stack_params'].CloudTrail;
+    let HuntersConfig        : TLZLoggingStackSQSAndProductContextParamType = contextParams['custom_tlz_logging_stack_params'].Hunters;
+    let WizConfig            : TLZLoggingStackSQSAndProductContextParamType = contextParams['custom_tlz_logging_stack_params'].Wiz;
+
+    console.log("Extracted the next CloudTrail Config From context: %s", CloudTrailConfig);
+    console.log("Extracted the next Hunters Config from context: %s", HuntersConfig);
+    console.log("Extracted the next Hunters Config from context: %s", WizConfig);
+
+    let CloudTrailNestedStack : any;
+    let HuntersNestedStack    : any;
+    let WizNestedStack        : any;
 
     //CLOUDTRAIL:
-    new CloudtrailTLZCoreLoggingStack(this,
+    CloudTrailNestedStack = new CloudtrailTLZCoreLoggingStack(this,
       'CloudtrailTLZCoreLoggingStack',
       {
-        cloudtrail_tlz_logging_stack_params: CloudTrail, 
+        cloudtrail_tlz_logging_stack_params: CloudTrailConfig, 
         main_aws_account: MainAWSAccount,
         main_aws_region: MainAWSRegion,
-        tlz_cloudtrail_logs_event_topic: TLZCloudtrailLogsEventTopic
 
       }
     );
 
     //HUNTERs:
-    new HuntersTLZCoreLoggingStack(this,
+    HuntersNestedStack = new HuntersTLZCoreLoggingStack(this,
       'HuntersTLZCoreLoggingStack', 
       { 
-        hunters_tlz_logging_stack_params: contextParams['custom_tlz_logging_stack_params'].Hunters as TLZLoggingStackContextHuntersParamType,
-        TLZCloudtrailLogsEventTopic,
-        TLZCloudtrailS3SNSEventNotificationEnabled: contextParams['custom_tlz_logging_stack_params'].CloudTrail.EnableS3SNSEventNotification as boolean
+        hunters_tlz_logging_stack_params: HuntersConfig,
+        TLZCloudtrailLogsEventTopic: CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
+        TLZCloudtrailS3SNSEventNotificationEnabled: CloudTrailNestedStack.EnableS3SNSEventNotification
       }
     );
 
-    //WIZ:
-    new WizTLZCoreLoggingStack(this,
+    // //WIZ:
+    WizNestedStack = new WizTLZCoreLoggingStack(this,
       'WizTLZCoreLoggingStack',
       { 
-        wiz_tlz_logging_stack_params: contextParams['custom_tlz_logging_stack_params.Wiz'].Wiz as TLZLoggingStackContextWizParamType,
-        TLZCloudtrailLogsEventTopic,
-        TLZCloudtrailS3SNSEventNotificationEnabled: contextParams['custom_tlz_logging_stack_params'].CloudTrail.EnableS3SNSEventNotification as boolean
+        wiz_tlz_logging_stack_params: WizConfig,
+        TLZCloudtrailLogsEventTopic: CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
+        TLZCloudtrailS3SNSEventNotificationEnabled: CloudTrailNestedStack.EnableS3SNSEventNotification
       }
     );
 

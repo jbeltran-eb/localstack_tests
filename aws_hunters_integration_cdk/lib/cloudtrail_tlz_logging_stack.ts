@@ -4,36 +4,37 @@ import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3Notifications from 'aws-cdk-lib/aws-s3-notifications';
 import { Construct } from 'constructs';
-import { TLZLoggingStackContextCloudtrailParamType } from './custom_types/tlz_logging_stack_custom_types'
+import { TLZLoggingStackS3AndSNSContextParamType } from './custom_types/tlz_logging_stack_custom_types';
 
 interface CloudtrailTLZCoreLoggingStackProps extends cdk.StackProps {
-    cloudtrail_tlz_logging_stack_params: TLZLoggingStackContextCloudtrailParamType;
+    cloudtrail_tlz_logging_stack_params: TLZLoggingStackS3AndSNSContextParamType; //TLZLoggingStackContextCloudtrailParamType;
     main_aws_account: string;
     main_aws_region: string;
-    tlz_cloudtrail_logs_event_topic: sns.ITopic;
 }
 
 export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
+    //Properties
+    public TLZCloudTrailBucket: s3.IBucket;
+    public TLZCloudtrailLogsEventTopic: sns.ITopic;
+
+    //Initialization of Class
     constructor(scope: Construct, id: string, props: CloudtrailTLZCoreLoggingStackProps) {
         super(scope, id, props)
 
         //Context Vars:
-        const CreateBucket: boolean = props.cloudtrail_tlz_logging_stack_params.CloudTrail.CreateBucket;
+        console.log("Cloudtrail in Nested Stack CloudTrail: %s: ", props.cloudtrail_tlz_logging_stack_params)
+        const CreateBucket: boolean = props.cloudtrail_tlz_logging_stack_params.CreateBucket;
         const MainAWSAccount: string = props.main_aws_account;
         const MainAWSRegion: string = props.main_aws_region;
-        const BucketName: string = `${props.cloudtrail_tlz_logging_stack_params.CloudTrail.BucketBaseName}-${MainAWSAccount}`;
-        const CreateSNSTopic: boolean = props.cloudtrail_tlz_logging_stack_params.CloudTrail.CreateSNSTopic;
-        const BucketSNSTopicBaseName: string = props.cloudtrail_tlz_logging_stack_params.CloudTrail.BucketSNSTopicBaseName;
-        const EnableS3SNSEventNotification: boolean = props.cloudtrail_tlz_logging_stack_params.CloudTrail.EnableS3SNSEventNotification;
-
-        //Dynamic Local Vars:
-        let TLZCloudTrailBucket: s3.IBucket;
-        let TLZCloudtrailLogsEventTopic: sns.ITopic = props.tlz_cloudtrail_logs_event_topic;
+        const BucketName: string = `${props.cloudtrail_tlz_logging_stack_params.BucketBaseName}-${MainAWSAccount}`;
+        const CreateSNSTopic: boolean = props.cloudtrail_tlz_logging_stack_params.CreateSNSTopic;
+        const BucketSNSTopicBaseName: string = props.cloudtrail_tlz_logging_stack_params.BucketSNSTopicBaseName;
+        const EnableS3SNSEventNotification: boolean = props.cloudtrail_tlz_logging_stack_params.EnableS3SNSEventNotification;
 
         //Create or Import S3 Bucket:
         if (CreateBucket){
 
-            TLZCloudTrailBucket = new s3.Bucket(this, BucketName, {
+            this.TLZCloudTrailBucket = new s3.Bucket(this, BucketName, {
                 removalPolicy: cdk.RemovalPolicy.RETAIN,
                 autoDeleteObjects: false,
                 versioned: false
@@ -41,7 +42,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
 
         }else{
 
-            TLZCloudTrailBucket = s3.Bucket.fromBucketName(this, BucketName, BucketName);
+            this.TLZCloudTrailBucket = s3.Bucket.fromBucketName(this, BucketName, BucketName);
 
         }
 
@@ -49,13 +50,13 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
         //
         if (CreateSNSTopic){
 
-            TLZCloudtrailLogsEventTopic = new sns.Topic(this, 'TLZCloudtrailLogsEventTopic', {
+            this.TLZCloudtrailLogsEventTopic = new sns.Topic(this, 'TLZCloudtrailLogsEventTopic', {
                 topicName: BucketSNSTopicBaseName
             });
 
         }else{ 
 
-            TLZCloudtrailLogsEventTopic = sns.Topic.fromTopicArn(this, 
+            this.TLZCloudtrailLogsEventTopic = sns.Topic.fromTopicArn(this, 
                 'TLZCloudtrailLogsEventTopic',
                 `arn:aws:sns:${MainAWSRegion}:${MainAWSAccount}:${BucketSNSTopicBaseName}`
             );
@@ -71,19 +72,15 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
         //
         if (EnableS3SNSEventNotification){
     
-            TLZCloudTrailBucket.addEventNotification(
+            this.TLZCloudTrailBucket.addEventNotification(
             // Modify the `s3.EventType.*` to handle other object operations.
             s3.EventType.OBJECT_CREATED_PUT,
-            new s3Notifications.SnsDestination(TLZCloudtrailLogsEventTopic),
+            new s3Notifications.SnsDestination(this.TLZCloudtrailLogsEventTopic),
             );
 
         };
 
-
-
-        //Nested Stack OUTPUTs: - Properties passed as references in current implementation.
-
-
+        //Nested Stack OUTPUTs: - Properties in current implementation.
 
     } //constructor
 } // NestedStack
