@@ -73,7 +73,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
         if (EnableS3SNSEventNotification){
     
             this.TLZCloudTrailBucket.addEventNotification(
-            // Modify the `s3.EventType.*` to handle other object operations.
+            // Modify/Add the `s3.EventType.*` to handle other object operations required.
             s3.EventType.OBJECT_CREATED_PUT,
             new s3Notifications.SnsDestination(this.TLZCloudtrailLogsEventTopic),
             );

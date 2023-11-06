@@ -52,7 +52,12 @@ export type TLZLoggingStackSQSAndProductContextParamType = {
     /**
      * Name for the AWS Queue to create
      */
-    QueueName: string
+    QueueName: string,
+    /**
+     * ARN for the AWS Queue to import
+     * (Only usable during import the resource)
+     */
+    QueueARN: string
 }
 
 export type TLZLoggingStackContextParamType = {

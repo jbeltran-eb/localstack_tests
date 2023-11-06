@@ -22,6 +22,7 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
         //
         const CreateSQSQueue                                : boolean = props.hunters_tlz_logging_stack_params.CreateSQSQueue;
         const QueueName                                     : string  = props.hunters_tlz_logging_stack_params.QueueName;
+        const QueueARN                                      : string  = props.hunters_tlz_logging_stack_params.QueueARN;
         const TLZCloudtrailS3SNSEventNotificationEnabled    : boolean = props.TLZCloudtrailS3SNSEventNotificationEnabled;
         const CloudTrailBucketName                          : string  = props.TLZCloudTrailBucketName;
         const HuntersAccountId                              : string  = props.hunters_tlz_logging_stack_params.AccountId;
@@ -57,7 +58,7 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
                 }
             );
         }else{
-            //WIP
+            HuntersCloudTrailsQueue = sqs.Queue.fromQueueArn(this, QueueName, QueueARN);
         }
 
         //Create SQS Subscription when required for corresponding SNS Topics

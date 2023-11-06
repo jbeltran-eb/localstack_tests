@@ -97,7 +97,8 @@
         "CloudTrailBucketAccessIamPolicyName": "hunters-integration-policy",
         "RoleName": "hunters-integration-role",
         "CreateSQSQueue": true,
-        "QueueName": "hunters-cloudtrail-logs-queue"
+        "QueueName": "hunters-cloudtrail-logs-queue",
+        "QueueARN": ""
       },
       "Wiz":{
         "AccountId": "197171649850",
@@ -106,7 +107,8 @@
         "CloudTrailBucketAccessIamPolicyName": "WizCloudTrailBucketAccessPolicy",
         "RoleName": "wiz-integration-role",
         "CreateSQSQueue": true,
-        "QueueName": "wiz-cloudtrail-logs-queue"
+        "QueueName": "wiz-cloudtrail-logs-queue",
+        "QueueARN":""
       }
     }
   }

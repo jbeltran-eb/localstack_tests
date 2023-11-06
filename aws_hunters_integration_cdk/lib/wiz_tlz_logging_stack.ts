@@ -22,6 +22,7 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
         //
         const CreateSQSQueue                               : boolean = props.wiz_tlz_logging_stack_params.CreateSQSQueue;
         const QueueName                                    : string  = props.wiz_tlz_logging_stack_params.QueueName;
+        const QueueARN                                     : string  = props.wiz_tlz_logging_stack_params.QueueARN;
         const TLZCloudtrailS3SNSEventNotificationEnabled   : boolean = props.TLZCloudtrailS3SNSEventNotificationEnabled;
         const CloudTrailBucketName                         : string  = props.TLZCloudTrailBucketName;
         const WizAccountId                                 : string  = props.wiz_tlz_logging_stack_params.AccountId;
@@ -58,7 +59,9 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
                 }
             );
         }else{
-            //WIP
+            
+            WizCloudTrailsQueue = sqs.Queue.fromQueueArn(this, QueueName, QueueARN);
+
         }
 
         //Create SQS Subscription when required for corresponding SNS Topics
