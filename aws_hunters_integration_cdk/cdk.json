@@ -62,6 +62,14 @@
     "custom_tlz_logging_stack_params": {
       "MainAWSAccount": "000000000000",
       "MainAWSRegion": "us-east-1",
+      "CreateStacks":{
+        "Config": true,
+        "GuardDuty": true,
+        "VPCFlowLogs": true,
+        "CloudTrail": true,
+        "Hunters": true,
+        "Wiz": true
+      },
       "CloudTrail":{
         "BucketBaseName": "tlz-cloudtrail-central",
         "BucketSNSTopicBaseName":"cloudtrail-logs-notify",

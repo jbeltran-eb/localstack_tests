@@ -1,3 +1,30 @@
+export type TLZLoggingCreatingStacksContextParamType = {
+    /**
+     * Define if AWS Config Stack is created or not
+     */
+    Config: boolean,
+    /**
+     * Define if Guard Duty Stack is created or not
+     */
+    GuardDuty: boolean,
+    /**
+     * Define if VPC Flow Logs Stack is created or not
+     */
+    VPCFlowLogs: boolean,
+    /**
+     * Define if CloudTrail Stack is created or not
+     */
+    CloudTrail: boolean,
+    /**
+     * Define if Hunters Stack is created or not
+     */
+    Hunters: boolean,
+    /**
+     * Define if Wiz Stack is created or not
+     */
+    Wiz: boolean
+}
+
 export type TLZLoggingStackS3AndSNSContextParamType = {
     /**
      * Base Name for the S3 Bucket where the logs will be storage.
@@ -82,13 +109,3 @@ export type TLZLoggingStackContextParamType = {
      */
     Wiz: TLZLoggingStackSQSAndProductContextParamType,
 };
-
-// [DEPRECATED]
-// // Cloudtrail Context Params SubType:
-// export type TLZLoggingStackContextCloudtrailParamType = Pick<TLZLoggingStackContextParamType, 'CloudTrail'>;
-
-// // Hunters Context Params SubType:
-// export type TLZLoggingStackContextHuntersParamType = Pick<TLZLoggingStackContextParamType, 'Hunters'>;
-
-// //Wiz Context Params SubType:
-// export type TLZLoggingStackContextWizParamType = Pick<TLZLoggingStackContextParamType,'Wiz'>;
