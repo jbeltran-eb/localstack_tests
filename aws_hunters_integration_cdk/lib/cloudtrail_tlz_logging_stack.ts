@@ -95,7 +95,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
                 'aws:SourceAccount': `${MainAWSAccount}`,
                 },
                 'ArnLike': {
-                'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //`arn:aws:s3:*:*:${BucketName}`,
+                'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
                 },
             },
             }),
