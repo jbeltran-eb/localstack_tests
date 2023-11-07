@@ -16,6 +16,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
     //Properties
     public TLZCloudTrailBucket: s3.IBucket;
     public TLZCloudtrailLogsEventTopic: sns.ITopic;
+    public TLZCloudtrailEnableS3SNSEventNotificationValue: boolean
 
     //Initialization of Class
     constructor(scope: Construct, id: string, props: CloudtrailTLZCoreLoggingStackProps) {
@@ -29,7 +30,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
         const BucketName: string = `${props.cloudtrail_tlz_logging_stack_params.BucketBaseName}-${MainAWSAccount}`;
         const CreateSNSTopic: boolean = props.cloudtrail_tlz_logging_stack_params.CreateSNSTopic;
         const BucketSNSTopicBaseName: string = props.cloudtrail_tlz_logging_stack_params.BucketSNSTopicBaseName;
-        const EnableS3SNSEventNotification: boolean = props.cloudtrail_tlz_logging_stack_params.EnableS3SNSEventNotification;
+        this.TLZCloudtrailEnableS3SNSEventNotificationValue = props.cloudtrail_tlz_logging_stack_params.EnableS3SNSEventNotification;
 
         //Create or Import S3 Bucket:
         if (CreateBucket){
@@ -70,7 +71,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
         //    Notification is not supported at this layer. 
         //  - Currently AWS CDK not allow import S3 Bucket Existing notifications
         //
-        if (EnableS3SNSEventNotification){
+        if (this.TLZCloudtrailEnableS3SNSEventNotificationValue){
     
             this.TLZCloudTrailBucket.addEventNotification(
             // Modify/Add the `s3.EventType.*` to handle other object operations required.
@@ -94,7 +95,7 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
                 'aws:SourceAccount': `${MainAWSAccount}`,
                 },
                 'ArnLike': {
-                'aws:SourceArn': `arn:aws:s3:*:*:${BucketName}`,
+                'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //`arn:aws:s3:*:*:${BucketName}`,
                 },
             },
             }),

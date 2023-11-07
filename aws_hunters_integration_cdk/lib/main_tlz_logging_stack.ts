@@ -8,6 +8,10 @@ import { WizTLZCoreLoggingStack } from '../lib/wiz_tlz_logging_stack';
 import { Construct } from 'constructs';
 
 export class MainTLZCoreLoggingStack extends cdk.Stack {
+  CloudTrailNestedStack: CloudtrailTLZCoreLoggingStack
+  HuntersNestedStack: cdk.NestedStack
+  WizNestedStack: cdk.NestedStack
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -38,12 +42,8 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     console.log("Extracted the next Hunters Config from context: %s", HuntersConfig);
     console.log("Extracted the next Hunters Config from context: %s", WizConfig);
 
-    let CloudTrailNestedStack : any;
-    let HuntersNestedStack    : any;
-    let WizNestedStack        : any;
-
     //CLOUDTRAIL:
-    CloudTrailNestedStack = new CloudtrailTLZCoreLoggingStack(this,
+    this.CloudTrailNestedStack = new CloudtrailTLZCoreLoggingStack(this,
       'CloudtrailTLZCoreLoggingStack',
       {
         cloudtrail_tlz_logging_stack_params: CloudTrailConfig, 
@@ -54,24 +54,24 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     );
 
     //HUNTERs:
-    HuntersNestedStack = new HuntersTLZCoreLoggingStack(this,
+    this.HuntersNestedStack = new HuntersTLZCoreLoggingStack(this,
       'HuntersTLZCoreLoggingStack', 
       { 
         hunters_tlz_logging_stack_params: HuntersConfig,
-        TLZCloudtrailLogsEventTopic: CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
-        TLZCloudtrailS3SNSEventNotificationEnabled: CloudTrailNestedStack.EnableS3SNSEventNotification,
-        TLZCloudTrailBucketName: CloudTrailNestedStack.TLZCloudTrailBucket.name
+        TLZCloudtrailLogsEventTopic: this.CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
+        TLZCloudtrailS3SNSEventNotificationEnabled: this.CloudTrailNestedStack.TLZCloudtrailEnableS3SNSEventNotificationValue,
+        TLZCloudTrailBucketName: this.CloudTrailNestedStack.TLZCloudTrailBucket.bucketName
       }
     );
 
     // //WIZ:
-    WizNestedStack = new WizTLZCoreLoggingStack(this,
+    this.WizNestedStack = new WizTLZCoreLoggingStack(this,
       'WizTLZCoreLoggingStack',
       { 
         wiz_tlz_logging_stack_params: WizConfig,
-        TLZCloudtrailLogsEventTopic: CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
-        TLZCloudtrailS3SNSEventNotificationEnabled: CloudTrailNestedStack.EnableS3SNSEventNotification,
-        TLZCloudTrailBucketName: CloudTrailNestedStack.TLZCloudTrailBucket.name
+        TLZCloudtrailLogsEventTopic: this.CloudTrailNestedStack.TLZCloudtrailLogsEventTopic,
+        TLZCloudtrailS3SNSEventNotificationEnabled: this.CloudTrailNestedStack.TLZCloudtrailEnableS3SNSEventNotificationValue,
+        TLZCloudTrailBucketName: this.CloudTrailNestedStack.TLZCloudTrailBucket.bucketName
       }
     );
 
