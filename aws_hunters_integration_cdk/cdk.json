@@ -72,22 +72,22 @@
       "Config":{
         "BucketBaseName": "tlz-config-central",
         "BucketSNSTopicBaseName":"config-logs-notify",
-        "CreateSNSTopic": false,
-        "CreateBucket": false,
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
         "EnableS3SNSEventNotification": false
       },
       "GuardDuty":{
         "BucketBaseName": "tlz-guardduty-central",
         "BucketSNSTopicBaseName":"guardduty-logs-notify",
-        "CreateSNSTopic": false,
-        "CreateBucket": false,
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
         "EnableS3SNSEventNotification": false
       },
       "VPCFlowLogs":{
         "BucketBaseName": "tlz-vpc-flowlogs-central",
         "BucketSNSTopicBaseName":"vpcflow-logs-notify",
-        "CreateSNSTopic": false,
-        "CreateBucket": false,
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
         "EnableS3SNSEventNotification": false
       },
       "Hunters":{

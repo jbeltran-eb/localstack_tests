@@ -7,7 +7,7 @@ import { Construct } from 'constructs';
 import { TLZLoggingStackS3AndSNSContextParamType } from './custom_types/tlz_logging_stack_custom_types';
 
 interface GuardDutyTLZCoreLoggingStackProps extends cdk.StackProps {
-    guardDuty_tlz_logging_stack_params: TLZLoggingStackS3AndSNSContextParamType;
+    guardduty_tlz_logging_stack_params: TLZLoggingStackS3AndSNSContextParamType;
     main_aws_account: string;
     main_aws_region: string;
 }
@@ -23,14 +23,14 @@ export class GuardDutyTLZCoreLoggingStack extends cdk.NestedStack {
         super(scope, id, props)
 
         //Context Vars:
-        console.log("GuardDuty in Nested Stack GuardDuty: %s: ", props.guardDuty_tlz_logging_stack_params)
-        const CreateBucket: boolean = props.guardDuty_tlz_logging_stack_params.CreateBucket;
+        console.log("GuardDuty in Nested Stack GuardDuty: %s: ", props.guardduty_tlz_logging_stack_params)
+        const CreateBucket: boolean = props.guardduty_tlz_logging_stack_params.CreateBucket;
         const MainAWSAccount: string = props.main_aws_account;
         const MainAWSRegion: string = props.main_aws_region;
-        const BucketName: string = `${props.guardDuty_tlz_logging_stack_params.BucketBaseName}-${MainAWSAccount}`;
-        const CreateSNSTopic: boolean = props.guardDuty_tlz_logging_stack_params.CreateSNSTopic;
-        const BucketSNSTopicBaseName: string = props.guardDuty_tlz_logging_stack_params.BucketSNSTopicBaseName;
-        this.TLZGuardDutyEnableS3SNSEventNotificationValue = props.guardDuty_tlz_logging_stack_params.EnableS3SNSEventNotification;
+        const BucketName: string = `${props.guardduty_tlz_logging_stack_params.BucketBaseName}-${MainAWSAccount}`;
+        const CreateSNSTopic: boolean = props.guardduty_tlz_logging_stack_params.CreateSNSTopic;
+        const BucketSNSTopicBaseName: string = props.guardduty_tlz_logging_stack_params.BucketSNSTopicBaseName;
+        this.TLZGuardDutyEnableS3SNSEventNotificationValue = props.guardduty_tlz_logging_stack_params.EnableS3SNSEventNotification;
 
         //Create or Import S3 Bucket:
         if (CreateBucket){
