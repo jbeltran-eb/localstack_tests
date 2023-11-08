@@ -36,8 +36,8 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
 
         // Local Vars
         //
-        let WizCloudTrailsQueue             : any;
-        let WizCloudTrailsQueueSubscription : any;
+        let WizCloudTrailsQueue             : sqs.IQueue;
+        let WizCloudTrailsQueueSubscription : snsSubscriptions.SqsSubscription;
 
         //Flag Status Reported from Config
         //

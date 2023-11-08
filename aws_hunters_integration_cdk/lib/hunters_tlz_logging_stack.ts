@@ -36,8 +36,8 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
 
         //Local Vars:
         //
-        let HuntersCloudTrailsQueue             : any;
-        let HuntersCloudTrailsQueueSubscription : any;
+        let HuntersCloudTrailsQueue             : sqs.IQueue;
+        let HuntersCloudTrailsQueueSubscription : snsSubscriptions.SqsSubscription;
 
         //Flag Status Reported from Config
         //
