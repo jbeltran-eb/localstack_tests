@@ -7,28 +7,36 @@ This project is created for the deployment of the main elements that allow
 the integration with Hunter, Wiz and other future products supporting integration
 via the indicated described design in next section:
 
-- S3 Bucket Logs 
-  (Currently creation but in future versions the flag should allow the "import to avoid modify existing data)
+- S3 Bucket Logs (Creation or import supported)
 - SNS Topics allowing the *"FanOut"* to corresponding SQS Queues for integrations purposes
-- SQS Queues receiving notifications via SNS SUbscriptions
+- SQS Queues receiving notifications via SNS Subscriptions
 - S3 Event notification to SNS Topics for the object creation
 - SQS Subscriptions to the SNS Topics
 
 ## "*Architecture Design*"
 
-The main architecture follows the next schema:
+The main architecture follows the next general schema:
 
 ![Architecture Design](./docs/images/main_architecture_design.png)
 
-## Pending/Future Tasks
+From a first monolithic version design, it was implemented using nested stack with L2 Basic *"Construtcs"*, a modular version:
 
-- Additional tests (Currently passed all tests via *'localstack'*. Successfully deployed stack and resources on it)
-- Include additional S3 Buckets,SNS Topics and SQS Queues for 
-  integration with additional products: Currently WIZ in progress
+![Architecture Design - Modular](./docs/images/main_architecture_design_modular.png)
+
+*Notes:*:
+  - Although SnsToSQS Constructs exists in the AWS Constructs HUB, the current status is experimental and
+    it was discarded as viable implementation. From a support point of view it would be *"problematic"*.
+
+## Future Tasks
+
+- Additional tests on AWS Final Environment
+  (Currently passed all tests via *'localstack'*: Successfully deployed all stacks and resources on them)
+- CDK Pipelines for deployment (In-Progress)
+- Include a Tool to make easier daily operations and automatic compliance analysis. (In Progress)
 
 ## Requirements
 
-The only requirements to run this project are:
+The main requirements to run this project are:
 
 - Access to an AWS Account/Environment
 - AWS CDK (or alternative) configured on the *"HOST"* running the project
