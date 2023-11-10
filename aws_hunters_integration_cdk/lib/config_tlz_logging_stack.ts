@@ -80,32 +80,34 @@ export class ConfigTLZCoreLoggingStack extends cdk.NestedStack {
 
         };
 
-        // Config Bucket Policy to allow SNS Notifications
-        //
-        const ConfigBucketPolicyForSNSStatements = [
-            new iam.PolicyStatement({
-            sid: 'AllowAWSS3Notification',
-            effect: iam.Effect.ALLOW,
-            principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
-            actions: ['SNS:Publish'],
-            resources: [this.TLZConfigLogsEventTopic.topicArn],
-            conditions: {
-                'StringEquals': {
-                'aws:SourceAccount': `${MainAWSAccount}`,
+        if (CreateSNSTopic){
+
+            // Config Bucket Policy to allow SNS Notifications
+            //
+            const ConfigBucketPolicyForSNSStatements = [
+                new iam.PolicyStatement({
+                sid: 'AllowAWSS3Notification',
+                effect: iam.Effect.ALLOW,
+                principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+                actions: ['SNS:Publish'],
+                resources: [this.TLZConfigLogsEventTopic.topicArn],
+                conditions: {
+                    'StringEquals': {
+                    'aws:SourceAccount': `${MainAWSAccount}`,
+                    },
+                    'ArnLike': {
+                    'aws:SourceArn': `${this.TLZConfigBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
+                    },
                 },
-                'ArnLike': {
-                'aws:SourceArn': `${this.TLZConfigBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
-                },
-            },
-            }),
-        ];
+                }),
+            ];
 
-        const TLZConfigLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZConfigLogsEventTopicPolicy', {
-            topics: [this.TLZConfigLogsEventTopic],
-        });
+            const TLZConfigLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZConfigLogsEventTopicPolicy', {
+                topics: [this.TLZConfigLogsEventTopic],
+            });
 
-        TLZConfigLogsEventTopicPolicy.document.addStatements(ConfigBucketPolicyForSNSStatements[0]);
-
+            TLZConfigLogsEventTopicPolicy.document.addStatements(ConfigBucketPolicyForSNSStatements[0]);
+        }
 
         //Nested Stack OUTPUTs: - Properties in current implementation.
 

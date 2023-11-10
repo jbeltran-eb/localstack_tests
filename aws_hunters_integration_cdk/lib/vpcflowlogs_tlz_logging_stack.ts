@@ -80,32 +80,34 @@ export class VPCFlowLogsTLZCoreLoggingStack extends cdk.NestedStack {
 
         };
 
-        // VPCFlowLogs Bucket Policy to allow SNS Notifications
-        //
-        const VPCFlowLogsBucketPolicyForSNSStatements = [
-            new iam.PolicyStatement({
-            sid: 'AllowAWSS3Notification',
-            effect: iam.Effect.ALLOW,
-            principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
-            actions: ['SNS:Publish'],
-            resources: [this.TLZVPCFlowLogsLogsEventTopic.topicArn],
-            conditions: {
-                'StringEquals': {
-                'aws:SourceAccount': `${MainAWSAccount}`,
+        if (CreateSNSTopic){
+
+            // VPCFlowLogs Bucket Policy to allow SNS Notifications
+            //
+            const VPCFlowLogsBucketPolicyForSNSStatements = [
+                new iam.PolicyStatement({
+                sid: 'AllowAWSS3Notification',
+                effect: iam.Effect.ALLOW,
+                principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+                actions: ['SNS:Publish'],
+                resources: [this.TLZVPCFlowLogsLogsEventTopic.topicArn],
+                conditions: {
+                    'StringEquals': {
+                    'aws:SourceAccount': `${MainAWSAccount}`,
+                    },
+                    'ArnLike': {
+                    'aws:SourceArn': `${this.TLZVPCFlowLogsBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
+                    },
                 },
-                'ArnLike': {
-                'aws:SourceArn': `${this.TLZVPCFlowLogsBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
-                },
-            },
-            }),
-        ];
+                }),
+            ];
 
-        const TLZVPCFlowLogsLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZVPCFlowLogsLogsEventTopicPolicy', {
-            topics: [this.TLZVPCFlowLogsLogsEventTopic],
-        });
+            const TLZVPCFlowLogsLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZVPCFlowLogsLogsEventTopicPolicy', {
+                topics: [this.TLZVPCFlowLogsLogsEventTopic],
+            });
 
-        TLZVPCFlowLogsLogsEventTopicPolicy.document.addStatements(VPCFlowLogsBucketPolicyForSNSStatements[0]);
-
+            TLZVPCFlowLogsLogsEventTopicPolicy.document.addStatements(VPCFlowLogsBucketPolicyForSNSStatements[0]);
+        } 
 
         //Nested Stack OUTPUTs: - Properties in current implementation.
 

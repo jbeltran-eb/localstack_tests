@@ -80,32 +80,34 @@ export class GuardDutyTLZCoreLoggingStack extends cdk.NestedStack {
 
         };
 
-        // GuardDuty Bucket Policy to allow SNS Notifications
-        //
-        const GuardDutyBucketPolicyForSNSStatements = [
-            new iam.PolicyStatement({
-            sid: 'AllowAWSS3Notification',
-            effect: iam.Effect.ALLOW,
-            principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
-            actions: ['SNS:Publish'],
-            resources: [this.TLZGuardDutyLogsEventTopic.topicArn],
-            conditions: {
-                'StringEquals': {
-                'aws:SourceAccount': `${MainAWSAccount}`,
+        if (CreateSNSTopic){
+
+            // GuardDuty Bucket Policy to allow SNS Notifications
+            //
+            const GuardDutyBucketPolicyForSNSStatements = [
+                new iam.PolicyStatement({
+                sid: 'AllowAWSS3Notification',
+                effect: iam.Effect.ALLOW,
+                principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+                actions: ['SNS:Publish'],
+                resources: [this.TLZGuardDutyLogsEventTopic.topicArn],
+                conditions: {
+                    'StringEquals': {
+                    'aws:SourceAccount': `${MainAWSAccount}`,
+                    },
+                    'ArnLike': {
+                    'aws:SourceArn': `${this.TLZGuardDutyBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
+                    },
                 },
-                'ArnLike': {
-                'aws:SourceArn': `${this.TLZGuardDutyBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
-                },
-            },
-            }),
-        ];
+                }),
+            ];
 
-        const TLZGuardDutyLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZGuardDutyLogsEventTopicPolicy', {
-            topics: [this.TLZGuardDutyLogsEventTopic],
-        });
+            const TLZGuardDutyLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZGuardDutyLogsEventTopicPolicy', {
+                topics: [this.TLZGuardDutyLogsEventTopic],
+            });
 
-        TLZGuardDutyLogsEventTopicPolicy.document.addStatements(GuardDutyBucketPolicyForSNSStatements[0]);
-
+            TLZGuardDutyLogsEventTopicPolicy.document.addStatements(GuardDutyBucketPolicyForSNSStatements[0]);
+        }
 
         //Nested Stack OUTPUTs: - Properties in current implementation.
 
