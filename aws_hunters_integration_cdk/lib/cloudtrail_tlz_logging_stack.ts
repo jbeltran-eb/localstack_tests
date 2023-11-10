@@ -72,11 +72,11 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
         //  - Currently AWS CDK not allow import S3 Bucket Existing notifications
         //
         if (this.TLZCloudtrailEnableS3SNSEventNotificationValue){
-    
+            // EventType used should be equivalent to the configured originally at this case: 
+            //  s3:ObjectCreated:*
             this.TLZCloudTrailBucket.addEventNotification(
-            // Modify/Add the `s3.EventType.*` to handle other object operations required.
-            s3.EventType.OBJECT_CREATED_PUT,
-            new s3Notifications.SnsDestination(this.TLZCloudtrailLogsEventTopic),
+                s3.EventType.OBJECT_CREATED,
+                new s3Notifications.SnsDestination(this.TLZCloudtrailLogsEventTopic),
             );
 
         };

@@ -74,9 +74,8 @@ export class GuardDutyTLZCoreLoggingStack extends cdk.NestedStack {
         if (this.TLZGuardDutyEnableS3SNSEventNotificationValue){
     
             this.TLZGuardDutyBucket.addEventNotification(
-            // Modify/Add the `s3.EventType.*` to handle other object operations required.
-            s3.EventType.OBJECT_CREATED_PUT,
-            new s3Notifications.SnsDestination(this.TLZGuardDutyLogsEventTopic),
+                s3.EventType.OBJECT_CREATED,
+                new s3Notifications.SnsDestination(this.TLZGuardDutyLogsEventTopic),
             );
 
         };

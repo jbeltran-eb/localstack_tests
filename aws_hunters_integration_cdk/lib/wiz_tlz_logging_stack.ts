@@ -120,7 +120,7 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
 
         WizCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
 
-              // CloudTrail SNS Policy: SQS Notify for Wiz
+        // CloudTrail SNS Policy: SQS Notify for Wiz
         const CloudTrailSNSPolicyForSQSWizStatements = [
             new iam.PolicyStatement({
                 sid: 'Allow-SNS-SendMessage',

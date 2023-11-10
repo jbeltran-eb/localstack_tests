@@ -74,9 +74,8 @@ export class VPCFlowLogsTLZCoreLoggingStack extends cdk.NestedStack {
         if (this.TLZVPCFlowLogsEnableS3SNSEventNotificationValue){
     
             this.TLZVPCFlowLogsBucket.addEventNotification(
-            // Modify/Add the `s3.EventType.*` to handle other object operations required.
-            s3.EventType.OBJECT_CREATED_PUT,
-            new s3Notifications.SnsDestination(this.TLZVPCFlowLogsLogsEventTopic),
+                s3.EventType.OBJECT_CREATED,
+                new s3Notifications.SnsDestination(this.TLZVPCFlowLogsLogsEventTopic),
             );
 
         };

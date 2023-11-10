@@ -74,9 +74,8 @@ export class ConfigTLZCoreLoggingStack extends cdk.NestedStack {
         if (this.TLZConfigEnableS3SNSEventNotificationValue){
     
             this.TLZConfigBucket.addEventNotification(
-            // Modify/Add the `s3.EventType.*` to handle other object operations required.
-            s3.EventType.OBJECT_CREATED_PUT,
-            new s3Notifications.SnsDestination(this.TLZConfigLogsEventTopic),
+                s3.EventType.OBJECT_CREATED,
+                new s3Notifications.SnsDestination(this.TLZConfigLogsEventTopic),
             );
 
         };
