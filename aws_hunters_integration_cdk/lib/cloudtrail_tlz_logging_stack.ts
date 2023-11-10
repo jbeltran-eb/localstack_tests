@@ -81,32 +81,33 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
 
         };
 
-        // CloudTrail Bucket Policy to allow SNS Notifications
-        //
-        const CloudTrailBucketPolicyForSNSStatements = [
-            new iam.PolicyStatement({
-            sid: 'AllowAWSS3Notification',
-            effect: iam.Effect.ALLOW,
-            principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
-            actions: ['SNS:Publish'],
-            resources: [this.TLZCloudtrailLogsEventTopic.topicArn],
-            conditions: {
-                'StringEquals': {
-                'aws:SourceAccount': `${MainAWSAccount}`,
+        if (CreateSNSTopic){
+            // CloudTrail Bucket Policy to allow SNS Notifications
+            //
+            const CloudTrailBucketPolicyForSNSStatements = [
+                new iam.PolicyStatement({
+                sid: 'AllowAWSS3Notification',
+                effect: iam.Effect.ALLOW,
+                principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+                actions: ['SNS:Publish'],
+                resources: [this.TLZCloudtrailLogsEventTopic.topicArn],
+                conditions: {
+                    'StringEquals': {
+                    'aws:SourceAccount': `${MainAWSAccount}`,
+                    },
+                    'ArnLike': {
+                    'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
+                    },
                 },
-                'ArnLike': {
-                'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
-                },
-            },
-            }),
-        ];
+                }),
+            ];
 
-        const TLZCloudtrailLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZCloudtrailLogsEventTopicPolicy', {
-            topics: [this.TLZCloudtrailLogsEventTopic],
-        });
+            const TLZCloudtrailLogsEventTopicPolicy = new sns.TopicPolicy(this, 'TLZCloudtrailLogsEventTopicPolicy', {
+                topics: [this.TLZCloudtrailLogsEventTopic],
+            });
 
-        TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
-
+            TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
+        }
 
         //Nested Stack OUTPUTs: - Properties in current implementation.
 
