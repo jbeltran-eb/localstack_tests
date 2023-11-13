@@ -55,6 +55,8 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
                 topicName: BucketSNSTopicBaseName
             });
 
+            this.TLZCloudtrailLogsEventTopic.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         }else{ 
 
             this.TLZCloudtrailLogsEventTopic = sns.Topic.fromTopicArn(this, 
@@ -80,6 +82,12 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
             );
 
         };
+
+        if (CreateBucket){
+            // Cloudtrail Bucket Policy for the own S3 Bucket
+            //
+            //Investigating because differences between accounts
+        }
 
         if (CreateSNSTopic){
             // CloudTrail Bucket Policy to allow SNS Notifications
@@ -107,6 +115,8 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
             });
 
             TLZCloudtrailLogsEventTopicPolicy.document.addStatements(CloudTrailBucketPolicyForSNSStatements[0]);
+
+            TLZCloudtrailLogsEventTopicPolicy.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN)
         }
 
         //Nested Stack OUTPUTs: - Properties in current implementation.

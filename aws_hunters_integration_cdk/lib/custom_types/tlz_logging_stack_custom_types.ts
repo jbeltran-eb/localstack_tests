@@ -4,25 +4,49 @@ export type TLZLoggingCreatingStacksContextParamType = {
      */
     Config: boolean,
     /**
+     * Define if AWS Config Stack enable termination protection or not
+     */
+    ConfigTerminationProtection: boolean,
+    /**
      * Define if Guard Duty Stack is created or not
      */
     GuardDuty: boolean,
+    /**
+     * Define if AWS Guard Duty Stack enable termination protection or not
+     */
+    GuardDutyTerminationProtection: boolean,
     /**
      * Define if VPC Flow Logs Stack is created or not
      */
     VPCFlowLogs: boolean,
     /**
+     * Define if AWS VPC Flow Logs Stack enable termination protection or not
+     */
+    VPCFlowLogsTerminationProtection: boolean,
+    /**
      * Define if CloudTrail Stack is created or not
      */
     CloudTrail: boolean,
+    /**
+     * Define if AWS Cloud Trail Stack enable termination protection or not
+     */
+    CloudTrailTerminationProtection: boolean,
     /**
      * Define if Hunters Stack is created or not
      */
     Hunters: boolean,
     /**
+     * Define if Hunters Stack enable termination protection or not
+     */
+    HuntersTerminationProtection: boolean,
+    /**
      * Define if Wiz Stack is created or not
      */
-    Wiz: boolean
+    Wiz: boolean,
+    /**
+     * Define if Wiz Stack enable termination protection or not
+     */
+    WizTerminationProtection: boolean
 }
 
 export type TLZLoggingStackS3AndSNSContextParamType = {
@@ -96,6 +120,10 @@ export type TLZLoggingStackContextParamType = {
      * AWS Region where components are deployed.
      */
     MainAWSRegion: string,
+    /**
+     * Define if the Root Stack enable or not the termination protection to avoid non desired stack deletions from users
+     */
+    RootStackTerminationProtection: boolean,
     /**
      * Values required for the configuration of Cloudtrail S3 Bucket for logs and SNS Topics.
      */

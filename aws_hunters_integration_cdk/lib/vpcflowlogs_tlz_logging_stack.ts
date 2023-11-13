@@ -55,6 +55,8 @@ export class VPCFlowLogsTLZCoreLoggingStack extends cdk.NestedStack {
                 topicName: BucketSNSTopicBaseName
             });
 
+            this.TLZVPCFlowLogsLogsEventTopic.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         }else{ 
 
             this.TLZVPCFlowLogsLogsEventTopic = sns.Topic.fromTopicArn(this, 
@@ -79,6 +81,12 @@ export class VPCFlowLogsTLZCoreLoggingStack extends cdk.NestedStack {
             );
 
         };
+
+        if (CreateBucket){
+            // VPC Flow Logs Bucket Policy for the own S3 Bucket
+            //
+            //Investigating because differences between accounts
+        }
 
         if (CreateSNSTopic){
 
@@ -107,6 +115,8 @@ export class VPCFlowLogsTLZCoreLoggingStack extends cdk.NestedStack {
             });
 
             TLZVPCFlowLogsLogsEventTopicPolicy.document.addStatements(VPCFlowLogsBucketPolicyForSNSStatements[0]);
+
+            TLZVPCFlowLogsLogsEventTopicPolicy.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN)
         } 
 
         //Nested Stack OUTPUTs: - Properties in current implementation.

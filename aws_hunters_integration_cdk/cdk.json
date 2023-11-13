@@ -62,13 +62,20 @@
     "custom_tlz_logging_stack_params": {
       "MainAWSAccount": "000000000000",
       "MainAWSRegion": "us-east-1",
+      "RootStackTerminationProtection": false,
       "CreateStacks":{
-        "Config": true,
-        "GuardDuty": true,
-        "VPCFlowLogs": true,
-        "CloudTrail": true,
-        "Hunters": true,
-        "Wiz": true
+        "Config": false,
+        "ConfigTerminationProtection": false,
+        "GuardDuty": false,
+        "GuardDutyTerminationProtection": false,
+        "VPCFlowLogs": false,
+        "VPCFlowLogsTerminationProtection": false,
+        "CloudTrail": false,
+        "CloudTrailTerminationProtection": false,
+        "Hunters": false,
+        "HuntersTerminationProtection": false,
+        "Wiz": false,
+        "WizTerminationProtection": false
       },
       "CloudTrail":{
         "BucketBaseName": "tlz-cloudtrail-central",

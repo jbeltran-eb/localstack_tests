@@ -55,6 +55,8 @@ export class GuardDutyTLZCoreLoggingStack extends cdk.NestedStack {
                 topicName: BucketSNSTopicBaseName
             });
 
+            this.TLZGuardDutyLogsEventTopic.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         }else{ 
 
             this.TLZGuardDutyLogsEventTopic = sns.Topic.fromTopicArn(this, 
@@ -79,6 +81,13 @@ export class GuardDutyTLZCoreLoggingStack extends cdk.NestedStack {
             );
 
         };
+
+        if (CreateBucket){
+            // Guard Duty Bucket Policy for the own S3 Bucket
+            //
+            //Investigating because differences between accounts
+        }
+
 
         if (CreateSNSTopic){
 
@@ -107,6 +116,8 @@ export class GuardDutyTLZCoreLoggingStack extends cdk.NestedStack {
             });
 
             TLZGuardDutyLogsEventTopicPolicy.document.addStatements(GuardDutyBucketPolicyForSNSStatements[0]);
+
+            TLZGuardDutyLogsEventTopicPolicy.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN)
         }
 
         //Nested Stack OUTPUTs: - Properties in current implementation.

@@ -57,6 +57,9 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
                     //visibilityTimeout: Duration.days(4),
                 }
             );
+
+            HuntersCloudTrailsQueue.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         }else{
             HuntersCloudTrailsQueue = sqs.Queue.fromQueueArn(this, QueueName, QueueARN);
         }
@@ -70,6 +73,7 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
             });
 
             TLZCloudtrailLogsEventTopic.addSubscription(HuntersCloudTrailsQueueSubscription);    
+
         }
 
         //Create Hunters's IAM Role, Policies and their statements:
@@ -148,6 +152,10 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
 
         HuntersCloudTrailBucketAccessIamPolicy.attachToRole(HuntersIamRole);
 
+        HuntersCloudTrailBucketAccessIamPolicy.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
+        HuntersIamRole.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         // CloudTrail SNS Policy: SQS Notify for Hunter
         const CloudTrailSNSPolicyForSQSHunterStatements = [
             new iam.PolicyStatement({
@@ -179,6 +187,8 @@ export class HuntersTLZCoreLoggingStack extends cdk.NestedStack {
             CloudTrailSNSPolicyForSQSHunterStatements[0],
             CloudTrailSNSPolicyForSQSHunterStatements[1]
         );
+
+        CloudTrailSNSPolicyForSQSHunters.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
 
     } //constructor
 } //NestedStack

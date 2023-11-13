@@ -66,6 +66,9 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
 
         }
       );
+
+      this.VPCFlowLogsNestedStack.terminationProtection = CreateStacks.VPCFlowLogsTerminationProtection;
+
     }
 
     if (CreateStacks.GuardDuty){
@@ -79,6 +82,9 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
 
         }
       );
+
+      this.GuardDutyNestedStack.terminationProtection = CreateStacks.GuardDutyTerminationProtection;
+
     }
 
     if (CreateStacks.Config){
@@ -92,6 +98,9 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
 
         }
       );
+
+      this.ConfigNestedStack.terminationProtection = CreateStacks.ConfigTerminationProtection;
+
     }
 
     if (CreateStacks.CloudTrail){
@@ -105,6 +114,8 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
 
         }
       );
+
+      this.CloudTrailNestedStack.terminationProtection = CreateStacks.CloudTrailTerminationProtection;
     
       if (CreateStacks.Hunters){
         //HUNTERs:
@@ -117,6 +128,8 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
             TLZCloudTrailBucketName: this.CloudTrailNestedStack.TLZCloudTrailBucket.bucketName
           }
         );
+
+        this.HuntersNestedStack.terminationProtection = CreateStacks.HuntersTerminationProtection;
       }
 
       if (CreateStacks.Wiz){
@@ -130,6 +143,8 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
             TLZCloudTrailBucketName: this.CloudTrailNestedStack.TLZCloudTrailBucket.bucketName
           }
         );
+
+        this.WizNestedStack.terminationProtection = CreateStacks.WizTerminationProtection;
       }
 
     }

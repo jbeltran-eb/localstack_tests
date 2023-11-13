@@ -58,6 +58,9 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
                     //visibilityTimeout: Duration.days(4),
                 }
             );
+
+            WizCloudTrailsQueue.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         }else{
             
             WizCloudTrailsQueue = sqs.Queue.fromQueueArn(this, QueueName, QueueARN);
@@ -120,6 +123,9 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
 
         WizCloudTrailBucketAccessIamPolicy.attachToRole(WizAccessIamRole);
 
+        WizCloudTrailBucketAccessIamPolicy.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+        WizAccessIamRole.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
+
         // CloudTrail SNS Policy: SQS Notify for Wiz
         const CloudTrailSNSPolicyForSQSWizStatements = [
             new iam.PolicyStatement({
@@ -151,6 +157,8 @@ export class WizTLZCoreLoggingStack extends cdk.NestedStack {
             CloudTrailSNSPolicyForSQSWizStatements[0],
             CloudTrailSNSPolicyForSQSWizStatements[1]
         );
+
+        CloudTrailSNSPolicyForSQSWiz.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
 
     } //constructor
 } //NestedStack
