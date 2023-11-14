@@ -36,6 +36,7 @@ export class ConfigTLZCoreLoggingStack extends cdk.NestedStack {
         if (CreateBucket){
 
             this.TLZConfigBucket = new s3.Bucket(this, BucketName, {
+                bucketName: BucketName,
                 removalPolicy: cdk.RemovalPolicy.RETAIN,
                 autoDeleteObjects: false,
                 versioned: false

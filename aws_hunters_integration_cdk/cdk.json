@@ -64,17 +64,17 @@
       "MainAWSRegion": "us-east-1",
       "RootStackTerminationProtection": false,
       "CreateStacks":{
-        "Config": false,
+        "Config": true,
         "ConfigTerminationProtection": false,
-        "GuardDuty": false,
+        "GuardDuty": true,
         "GuardDutyTerminationProtection": false,
-        "VPCFlowLogs": false,
+        "VPCFlowLogs": true,
         "VPCFlowLogsTerminationProtection": false,
-        "CloudTrail": false,
+        "CloudTrail": true,
         "CloudTrailTerminationProtection": false,
-        "Hunters": false,
+        "Hunters": true,
         "HuntersTerminationProtection": false,
-        "Wiz": false,
+        "Wiz": true,
         "WizTerminationProtection": false
       },
       "CloudTrail":{
