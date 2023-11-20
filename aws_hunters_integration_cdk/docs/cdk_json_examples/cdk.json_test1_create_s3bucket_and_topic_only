@@ -60,29 +60,29 @@
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
     "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
     "custom_tlz_logging_stack_params": {
-      "MainAWSAccount": "000000000000",
+      "MainAWSAccount": "716054712644",
       "MainAWSRegion": "us-east-1",
-      "RootStackTerminationProtection": true,
+      "RootStackTerminationProtection": false,
       "CreateStacks":{
-        "Config": true,
+        "Config": false,
         "ConfigTerminationProtection": false,
-        "GuardDuty": true,
+        "GuardDuty": false,
         "GuardDutyTerminationProtection": false,
-        "VPCFlowLogs": true,
+        "VPCFlowLogs": false,
         "VPCFlowLogsTerminationProtection": false,
         "CloudTrail": true,
-        "CloudTrailTerminationProtection": false,
-        "Hunters": true,
+        "CloudTrailTerminationProtection": true,
+        "Hunters": false,
         "HuntersTerminationProtection": false,
-        "Wiz": true,
+        "Wiz": false,
         "WizTerminationProtection": false
       },
       "CloudTrail":{
-        "BucketBaseName": "tlz-cloudtrail-central",
-        "BucketSNSTopicBaseName":"cloudtrail-logs-notify",
+        "BucketBaseName": "tlz-cloudtrail-central-test",
+        "BucketSNSTopicBaseName":"cloudtrail-logs-notify-test",
         "CreateSNSTopic": true,
         "CreateBucket": true,
-        "EnableS3SNSEventNotification": false
+        "EnableS3SNSEventNotification": true
       },
       "Config":{
         "BucketBaseName": "tlz-config-central",

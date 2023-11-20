@@ -32,6 +32,9 @@ export class MainTLZCoreLoggingStack extends cdk.Stack {
     console.log(contextParams);
     console.log('---')
 
+    // -- Global Protection for Deletion in Main Stack:
+    this.terminationProtection = contextParams['custom_tlz_logging_stack_params'].RootStackTerminationProtection;
+
     // --- CREATING NESTED STACKs ---
     //
 

@@ -60,15 +60,15 @@
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
     "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
     "custom_tlz_logging_stack_params": {
-      "MainAWSAccount": "000000000000",
+      "MainAWSAccount": "716054712644",
       "MainAWSRegion": "us-east-1",
-      "RootStackTerminationProtection": true,
+      "RootStackTerminationProtection": false,
       "CreateStacks":{
-        "Config": true,
+        "Config": false,
         "ConfigTerminationProtection": false,
-        "GuardDuty": true,
+        "GuardDuty": false,
         "GuardDutyTerminationProtection": false,
-        "VPCFlowLogs": true,
+        "VPCFlowLogs": false,
         "VPCFlowLogsTerminationProtection": false,
         "CloudTrail": true,
         "CloudTrailTerminationProtection": false,
@@ -81,8 +81,8 @@
         "BucketBaseName": "tlz-cloudtrail-central",
         "BucketSNSTopicBaseName":"cloudtrail-logs-notify",
         "CreateSNSTopic": true,
-        "CreateBucket": true,
-        "EnableS3SNSEventNotification": false
+        "CreateBucket": false,
+        "EnableS3SNSEventNotification": true
       },
       "Config":{
         "BucketBaseName": "tlz-config-central",
@@ -108,11 +108,11 @@
       "Hunters":{
         "AccountId": "685648138888",
         "ExternalId": "9c7779b2-4bf8-4d04-9ec8-67186102afc1",
-        "KmsArns": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
-        "CloudTrailBucketAccessIamPolicyName": "hunters-integration-policy",
-        "RoleName": "hunters-integration-role",
+        "KmsArns": "",
+        "CloudTrailBucketAccessIamPolicyName": "hunters-integration-policy-test2",
+        "RoleName": "hunters-integration-role-test2",
         "CreateSQSQueue": true,
-        "QueueName": "hunters-cloudtrail-logs-queue",
+        "QueueName": "hunters-cloudtrail-logs-queue-test2",
         "QueueARN": ""
       },
       "Wiz":{
@@ -123,7 +123,7 @@
         "RoleName": "wiz-integration-role",
         "CreateSQSQueue": true,
         "QueueName": "wiz-cloudtrail-logs-queue",
-        "QueueARN":""
+        "QueueARN":"arn:aws:sqs:us-east-1:716054712644:wiz-cloudtrail-logs-queue"
       }
     }
   }

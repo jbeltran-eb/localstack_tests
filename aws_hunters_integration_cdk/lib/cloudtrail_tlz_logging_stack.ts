@@ -95,19 +95,19 @@ export class CloudtrailTLZCoreLoggingStack extends cdk.NestedStack {
             //
             const CloudTrailBucketPolicyForSNSStatements = [
                 new iam.PolicyStatement({
-                sid: 'AllowAWSS3Notification',
-                effect: iam.Effect.ALLOW,
-                principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
-                actions: ['SNS:Publish'],
-                resources: [this.TLZCloudtrailLogsEventTopic.topicArn],
-                conditions: {
-                    'StringEquals': {
-                    'aws:SourceAccount': `${MainAWSAccount}`,
+                    sid: 'AllowAWSS3Notification',
+                    effect: iam.Effect.ALLOW,
+                    principals: [new iam.ServicePrincipal('s3.amazonaws.com')],
+                    actions: ['SNS:Publish'],
+                    resources: [this.TLZCloudtrailLogsEventTopic.topicArn],
+                    conditions: {
+                        'StringEquals': {
+                            'aws:SourceAccount': `${MainAWSAccount}`,
+                        },
+                        'ArnLike': {
+                            'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
+                        },
                     },
-                    'ArnLike': {
-                    'aws:SourceArn': `${this.TLZCloudTrailBucket.bucketArn}`, //Change if non region limited required to: `arn:aws:s3:*:*:${BucketName}`,
-                    },
-                },
                 }),
             ];
 

@@ -29,8 +29,6 @@ From a first monolithic version design, it was implemented using nested stack wi
 
 ## Future Tasks
 
-- Additional tests on AWS Final Environment
-  (Currently passed all tests via *'localstack'*: Successfully deployed all stacks and resources on them)
 - CDK Pipelines for deployment (In-Progress)
 - Include a Tool to make easier daily operations and automatic compliance analysis. (In Progress)
 
