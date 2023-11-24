@@ -1,0 +1,130 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/main_tlz_logging_stack_eb.ts",
+  "watch": {
+    "include": [
+      "**"
+    ],
+    "exclude": [
+      "README.md",
+      "cdk*.json",
+      "**/*.d.ts",
+      "**/*.js",
+      "tsconfig.json",
+      "package*.json",
+      "yarn.lock",
+      "node_modules",
+      "test"
+    ]
+  },
+  "context": {
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/core:target-partitions": [
+      "aws",
+      "aws-cn"
+    ],
+    "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": true,
+    "@aws-cdk/aws-ec2:uniqueImdsv2TemplateName": true,
+    "@aws-cdk/aws-ecs:arnFormatIncludesClusterName": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/core:validateSnapshotRemovalPolicy": true,
+    "@aws-cdk/aws-codepipeline:crossAccountKeyAliasStackSafeResourceName": true,
+    "@aws-cdk/aws-s3:createDefaultLoggingPolicy": true,
+    "@aws-cdk/aws-sns-subscriptions:restrictSqsDescryption": true,
+    "@aws-cdk/aws-apigateway:disableCloudWatchRole": true,
+    "@aws-cdk/core:enablePartitionLiterals": true,
+    "@aws-cdk/aws-events:eventsTargetQueueSameAccount": true,
+    "@aws-cdk/aws-iam:standardizedServicePrincipals": true,
+    "@aws-cdk/aws-ecs:disableExplicitDeploymentControllerForCircuitBreaker": true,
+    "@aws-cdk/aws-iam:importedRoleStackSafeDefaultPolicyName": true,
+    "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": true,
+    "@aws-cdk/aws-route53-patters:useCertificate": true,
+    "@aws-cdk/customresources:installLatestAwsSdkDefault": false,
+    "@aws-cdk/aws-rds:databaseProxyUniqueResourceName": true,
+    "@aws-cdk/aws-codedeploy:removeAlarmsFromDeploymentGroup": true,
+    "@aws-cdk/aws-apigateway:authorizerChangeDeploymentLogicalId": true,
+    "@aws-cdk/aws-ec2:launchTemplateDefaultUserData": true,
+    "@aws-cdk/aws-secretsmanager:useAttachedSecretResourcePolicyForSecretTargetAttachments": true,
+    "@aws-cdk/aws-redshift:columnId": true,
+    "@aws-cdk/aws-stepfunctions-tasks:enableEmrServicePolicyV2": true,
+    "@aws-cdk/aws-ec2:restrictDefaultSecurityGroup": true,
+    "@aws-cdk/aws-apigateway:requestValidatorUniqueId": true,
+    "@aws-cdk/aws-kms:aliasNameRef": true,
+    "@aws-cdk/aws-autoscaling:generateLaunchTemplateInsteadOfLaunchConfig": true,
+    "@aws-cdk/core:includePrefixInUniqueNameGeneration": true,
+    "@aws-cdk/aws-efs:denyAnonymousAccess": true,
+    "@aws-cdk/aws-opensearchservice:enableOpensearchMultiAzWithStandby": true,
+    "@aws-cdk/aws-lambda-nodejs:useLatestRuntimeVersion": true,
+    "@aws-cdk/aws-efs:mountTargetOrderInsensitiveLogicalId": true,
+    "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": true,
+    "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
+    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
+    "custom_tlz_logging_stack_params": {
+      "MainAWSAccount": "903958141776",
+      "MainAWSRegion": "us-east-1",
+      "RootStackTerminationProtection": true,
+      "CreateStacks":{
+        "Config": false,
+        "ConfigTerminationProtection": false,
+        "GuardDuty": false,
+        "GuardDutyTerminationProtection": false,
+        "VPCFlowLogs": false,
+        "VPCFlowLogsTerminationProtection": false,
+        "CloudTrail": true,
+        "CloudTrailTerminationProtection": false,
+        "Hunters": true,
+        "HuntersTerminationProtection": false,
+        "Wiz": true,
+        "WizTerminationProtection": false
+      },
+      "CloudTrail":{
+        "BucketBaseName": "tlz-cloudtrail-central",
+        "BucketSNSTopicBaseName":"cloudtrail-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": false,
+        "EnableS3SNSEventNotification": true
+      },
+      "Config":{
+        "BucketBaseName": "tlz-config-central",
+        "BucketSNSTopicBaseName":"config-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "GuardDuty":{
+        "BucketBaseName": "tlz-guardduty-central",
+        "BucketSNSTopicBaseName":"guardduty-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "VPCFlowLogs":{
+        "BucketBaseName": "tlz-vpc-flowlogs-central",
+        "BucketSNSTopicBaseName":"vpcflow-logs-notify",
+        "CreateSNSTopic": true,
+        "CreateBucket": true,
+        "EnableS3SNSEventNotification": false
+      },
+      "Hunters":{
+        "AccountId": "685648138888",
+        "ExternalId": "9c7779b2-4bf8-4d04-9ec8-67186102afc1",
+        "KmsArns": "",
+        "CloudTrailBucketAccessIamPolicyName": "hunters-integration-policy",
+        "RoleName": "hunters-integration-role",
+        "CreateSQSQueue": true,
+        "QueueName": "hunters-cloudtrail-logs-queue",
+        "QueueARN": ""
+      },
+      "Wiz":{
+        "AccountId": "197171649850",
+        "ExternalId": "7d2dd322-8576-429b-b6e7-b4bb94b48d84",
+        "KmsArns": "",
+        "CloudTrailBucketAccessIamPolicyName": "WizCloudTrailBucketAccessPolicy",
+        "RoleName": "wiz-integration-role",
+        "CreateSQSQueue": true,
+        "QueueName": "wiz-cloudtrail-logs-queue",
+        "QueueARN":""
+      }
+    }
+  }
+}
